@@ -1,0 +1,67 @@
+/* ============================================================
+   ClipAnalisis — DESIGN TOKENS · OURO · PRETO · BRANCO
+   Gold = metal (highlight + shadow), never flat yellow.
+   Calibrate these against the real profile assets when supplied.
+   ============================================================ */
+:root {
+  --bg: #0a0a0b; /* preto-quase, nunca #000 puro */
+  --bg-elev: #121214;
+  --surface: #1a1a1d;
+  --text: #f5f3ec; /* off-white quente */
+  --white: #ffffff; /* contraste cirúrgico / brilhos */
+  --muted: #8f8b80; /* cinza quente */
+  --border: rgba(212, 175, 55, 0.18); /* hairline dourada sutil */
+
+  --gold: #d4af37; /* ouro sólido — accent, bordas, glow */
+  --gold-hi: #f6e08a; /* brilho do metal */
+  --gold-lo: #8c6e22; /* sombra do metal */
+  --danger: #e5484d; /* funcional, RARO */
+
+  /* metal gradient reused across foil text + borders */
+  --foil: linear-gradient(
+    180deg,
+    #f6e08a 0%,
+    #e6c35c 24%,
+    #d4af37 52%,
+    #b8932e 78%,
+    #8c6e22 100%
+  );
+
+  --ease-pop: cubic-bezier(0.22, 1, 0.36, 1);
+  --maxw: 1180px;
+
+  /* ── App section — violet dark design system ────────────────── */
+  --app-bg-primary:   #0A0A0F;
+  --app-bg-secondary: #12121A;
+  --app-bg-card:      #1A1A26;
+  --app-bg-hover:     #22223A;
+
+  --app-border-subtle:  rgba(255,255,255,0.06);
+  --app-border-default: rgba(255,255,255,0.12);
+  --app-border-strong:  rgba(255,255,255,0.24);
+
+  --app-accent:        #7C3AED;
+  --app-accent-hover:  #6D28D9;
+  --app-accent-glow:   rgba(124,58,237,0.3);
+  --app-accent-subtle: rgba(124,58,237,0.12);
+
+  --app-text-primary:   #F0F0FF;
+  --app-text-secondary: rgba(240,240,255,0.6);
+  --app-text-muted:     rgba(240,240,255,0.35);
+
+  --app-success: #10B981;
+  --app-warning: #F59E0B;
+  --app-error:   #EF4444;
+  --app-info:    #3B82F6;
+
+  --app-radius-sm: 6px;
+  --app-radius-md: 10px;
+  --app-radius-lg: 16px;
+  --app-radius-xl: 24px;
+
+  --app-shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --app-shadow-glow: 0 0 40px var(--app-accent-glow);
+
+  --sidebar-w:          220px;
+  --sidebar-w-collapsed: 64px;
+}

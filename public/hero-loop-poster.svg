@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" role="img" aria-label="Clip sendo analisado">
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F6E08A" />
+      <stop offset="52%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#8C6E22" />
+    </linearGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0" />
+      <stop offset="50%" stop-color="#D4AF37" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="#0A0A0B" />
+  <!-- scanner -->
+  <rect x="0" y="380" width="1080" height="120" fill="url(#scan)" />
+  <!-- waveform -->
+  <g fill="url(#foil)">
+    <rect x="220" y="700" width="14" height="60" rx="6" />
+    <rect x="252" y="660" width="14" height="140" rx="6" />
+    <rect x="284" y="620" width="14" height="220" rx="6" />
+    <rect x="316" y="560" width="14" height="320" rx="6" />
+    <rect x="348" y="660" width="14" height="140" rx="6" />
+    <rect x="380" y="700" width="14" height="60" rx="6" />
+    <rect x="412" y="640" width="14" height="180" rx="6" />
+    <rect x="444" y="600" width="14" height="260" rx="6" />
+    <rect x="476" y="560" width="14" height="320" rx="6" />
+    <rect x="508" y="680" width="14" height="100" rx="6" />
+    <rect x="540" y="700" width="14" height="60" rx="6" />
+    <rect x="572" y="640" width="14" height="180" rx="6" />
+    <rect x="604" y="600" width="14" height="260" rx="6" />
+    <rect x="636" y="640" width="14" height="180" rx="6" />
+    <rect x="668" y="700" width="14" height="60" rx="6" />
+    <rect x="700" y="660" width="14" height="140" rx="6" />
+    <rect x="732" y="620" width="14" height="220" rx="6" />
+    <rect x="764" y="700" width="14" height="60" rx="6" />
+    <rect x="796" y="680" width="14" height="100" rx="6" />
+    <rect x="828" y="700" width="14" height="60" rx="6" />
+  </g>
+  <!-- legenda pipocando -->
+  <text x="540" y="300" text-anchor="middle" font-family="Anton, Impact, sans-serif"
+        font-size="92" letter-spacing="-2" fill="#F5F3EC">ISSO AQUI</text>
+  <text x="540" y="410" text-anchor="middle" font-family="Anton, Impact, sans-serif"
+        font-size="120" letter-spacing="-2" fill="url(#foil)">VIRALIZA</text>
+  <!-- número subindo -->
+  <text x="540" y="980" text-anchor="middle" font-family="'JetBrains Mono', monospace"
+        font-size="64" fill="url(#foil)">+312% RETENÇÃO</text>
+</svg>

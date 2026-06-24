@@ -1,0 +1,27 @@
+# Supabase project config for XZK clip-analysis backend.
+# Run `supabase link` against your project, then `supabase db push` and
+# `supabase functions deploy analyze-clip`.
+project_id = "xzk-clip-analysis"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[storage]
+enabled = true
+# 100MB cap aligns with the clip-videos bucket limit.
+file_size_limit = "100MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+
+[functions.analyze-clip]
+verify_jwt = true

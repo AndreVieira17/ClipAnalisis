@@ -1,0 +1,199 @@
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   BASE
+------------------------------------------------------------------ */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: #0a0a0b;
+  }
+
+  /* fina scrollbar dourada */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--gold-lo), var(--gold));
+    border-radius: 99px;
+    border: 2px solid var(--bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Anton', Impact, sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+}
+
+/* ------------------------------------------------------------------
+   COMPONENTS / UTILITIES
+------------------------------------------------------------------ */
+@layer components {
+  /* OURO FOIL — metal em texto, com sheen lento por cima */
+  .gold-foil {
+    background: var(--foil);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    position: relative;
+  }
+
+  .gold-foil-sheen {
+    background: linear-gradient(
+      100deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.85) 48%,
+      rgba(255, 255, 255, 0.1) 52%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* hairline dourada */
+  .hairline {
+    border: 1px solid var(--border);
+  }
+
+  /* halo/glow dourado discreto */
+  .gold-glow {
+    box-shadow:
+      0 0 0 1px rgba(212, 175, 55, 0.25),
+      0 8px 40px -12px rgba(212, 175, 55, 0.3);
+  }
+
+  .num-glow {
+    text-shadow: 0 0 24px rgba(212, 175, 55, 0.35);
+  }
+
+  /* botão ouro metálico */
+  .btn-gold {
+    background: var(--foil);
+    color: #0a0a0b;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 10px 30px -10px rgba(212, 175, 55, 0.5);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    color: var(--gold-hi);
+  }
+
+  .chip {
+    border: 1px solid var(--border);
+    background: rgba(212, 175, 55, 0.04);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+}
+
+/* ------------------------------------------------------------------
+   ATMOSFERA — grão global + scanlines sutis
+------------------------------------------------------------------ */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.scanlines {
+  position: relative;
+}
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.025) 0px,
+    rgba(255, 255, 255, 0.025) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+}
+
+/* ------------------------------------------------------------------
+   3D pop-out — perspective wrapper for Camada A
+------------------------------------------------------------------ */
+.scene {
+  perspective: 900px;
+}
+.pop3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.4s var(--ease-pop);
+}
+
+/* ------------------------------------------------------------------
+   ACESSIBILIDADE — reduced motion desliga tudo o que se mexe sozinho
+------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
