@@ -11,7 +11,7 @@ const STRIPE_SECRET_KEY     = Deno.env.get('STRIPE_SECRET_KEY')!;
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 const RESEND_API_KEY        = Deno.env.get('RESEND_API_KEY') ?? '';
 const FROM_EMAIL            = 'ClipAnalisis <noreply@clipanalisis.com>';
-const TELEGRAM_LINK         = Deno.env.get('TELEGRAM_ELITE_LINK') ?? 'https://t.me/clipanalisis_elite';;
+const TELEGRAM_LINK         = Deno.env.get('TELEGRAM_ELITE_LINK') ?? 'https://t.me/clipanalisis_elite';
 
 type PlanTier = 'free' | 'starter' | 'pro' | 'elite';
 

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Reveal } from '@/components/ui/Reveal';
-import { staggerParent, staggerChild } from '@/components/ui/motion-presets';
+import { staggerParent, staggerChild, wordRevealParent, wordRevealChild } from '@/components/ui/motion-presets';
 import { PopCard } from '@/components/ui/PopCard';
 import { Stat } from '@/components/ui/Stat';
 import { useI18n } from '@/lib/i18n';
@@ -19,10 +19,23 @@ export function Analyzed() {
       <div className="mx-auto max-w-[var(--maxw)] px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
           <span className="chip rounded-full px-3 py-1">{t.analyzed.chip}</span>
-          <h2 className="mt-4 max-w-2xl text-[clamp(2rem,5vw,3.4rem)]">
-            {t.analyzed.title} <span className="gold-foil">{t.analyzed.titleHighlight}</span>.
-          </h2>
         </Reveal>
+        <motion.h2
+          className="mt-4 max-w-2xl text-[clamp(2rem,5vw,3.4rem)]"
+          variants={wordRevealParent}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          {t.analyzed.title.split(' ').map((word, i) => (
+            <motion.span key={i} variants={wordRevealChild} className="inline-block mr-[0.25em]">
+              {word}
+            </motion.span>
+          ))}
+          <motion.span variants={wordRevealChild} className="inline-block gold-foil">
+            {t.analyzed.titleHighlight}.
+          </motion.span>
+        </motion.h2>
 
         <div className="mt-12 grid grid-cols-2 gap-8 border-y border-border py-8 sm:grid-cols-4">
           {STAT_VALUES.map((sv, i) => (
