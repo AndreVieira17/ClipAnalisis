@@ -9,6 +9,9 @@ const SUPABASE_URL          = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE          = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const STRIPE_SECRET_KEY     = Deno.env.get('STRIPE_SECRET_KEY')!;
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
+const RESEND_API_KEY        = Deno.env.get('RESEND_API_KEY') ?? '';
+const FROM_EMAIL            = 'ClipAnalisis <noreply@clipanalisis.com>';
+const TELEGRAM_LINK         = Deno.env.get('TELEGRAM_ELITE_LINK') ?? 'https://t.me/clipanalisis_elite';;
 
 type PlanTier = 'free' | 'starter' | 'pro' | 'elite';
 
@@ -117,6 +120,102 @@ async function handleCheckoutCompleted(
       daily_analyses_used:    0,
       last_daily_reset:       now.toISOString(),
     }, { onConflict: 'id' });
+  }
+
+  // Send Telegram invite email for Elite plan
+  if (plan === 'elite' && session.customer_email) {
+    await sendEliteEmail(session.customer_email).catch((e) =>
+      console.error('send-elite-email failed (non-fatal):', e)
+    );
+  }
+}
+
+async function sendEliteEmail(email: string): Promise<void> {
+  if (!RESEND_API_KEY) return;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0A0A0F;font-family:'Inter',Arial,sans-serif;color:#F0F0FF;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0F;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#12121A;border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="background:linear-gradient(135deg,#1a1a26,#0f0f1a);padding:32px 40px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <p style="margin:0;font-size:22px;font-weight:700;letter-spacing:0.04em;color:#D4AF37;">
+              CLIP<span style="color:#F0F0FF;">ANALISIS</span>
+              <span style="font-size:12px;font-weight:600;margin-left:10px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:3px 10px;color:#D4AF37;letter-spacing:0.1em;">ELITE</span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px;">
+            <p style="margin:0 0 16px;font-size:24px;font-weight:700;color:#F0F0FF;line-height:1.3;">
+              Bem-vindo ao Elite 👑
+            </p>
+            <p style="margin:0 0 24px;font-size:15px;color:rgba(240,240,255,0.65);line-height:1.6;">
+              O teu plano Elite está activo. Como membro Elite tens acesso ao nosso grupo privado no Telegram — onde partilhamos clips, estratégias e oportunidades antes de toda a gente.
+            </p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
+              <tr>
+                <td style="background:#D4AF37;border-radius:8px;">
+                  <a href="${TELEGRAM_LINK}" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#0A0A0F;text-decoration:none;letter-spacing:0.05em;">
+                    ENTRAR NO GRUPO TELEGRAM →
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);border-radius:10px;margin-bottom:32px;">
+              <tr>
+                <td style="padding:20px 24px;">
+                  <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#D4AF37;letter-spacing:0.12em;text-transform:uppercase;">O teu plano Elite inclui</p>
+                  <ul style="margin:0;padding:0 0 0 16px;font-size:14px;color:rgba(240,240,255,0.7);line-height:1.8;">
+                    <li>Análises ilimitadas</li>
+                    <li>Revisão humana do clip</li>
+                    <li>Roteiro de edição com timestamps</li>
+                    <li>Prioridade máxima na fila</li>
+                    <li>Benchmark com virais do nicho</li>
+                    <li>Grupo privado no Telegram 💬</li>
+                  </ul>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0;font-size:13px;color:rgba(240,240,255,0.4);line-height:1.6;">
+              — Equipa ClipAnalisis
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.06);">
+            <p style="margin:0;font-size:11px;color:rgba(240,240,255,0.25);text-align:center;">
+              © 2025 ClipAnalisis · Feito pra estourar
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [email],
+      subject: '👑 Bem-vindo ao Elite — o teu link do Telegram está aqui',
+      html,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Resend error: ${err}`);
   }
 }
 

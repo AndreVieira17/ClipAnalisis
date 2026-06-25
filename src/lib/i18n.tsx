@@ -142,7 +142,7 @@ const pt: Translations = {
       { id: 'free', name: 'FREE', price: '0€', cadence: '/dia', tagline: '1 análise por dia, reset às 24h. Sem cartão.', features: ['1 análise / dia (reset 24h)', '6 pilares frame a frame + evidência', 'Diagnóstico de retenção', 'Veredito + gargalo', 'Estratégias de crescimento'], cta: 'COMEÇAR GRÁTIS' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mês', tagline: 'Pra começar a postar com direção todo mês.', features: ['10 análises / mês', '6 pilares + evidência + retenção', 'Veredito + gargalo', 'Até 3 correções prioritárias', '1 áudio / fonte / tutorial'], cta: 'ASSINAR STARTER' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mês', tagline: 'Pro clipador que vive de postar e quer estourar.', features: ['Análises ILIMITADAS', 'Correções prioritárias completas', 'Estratégias de crescimento', 'Áudios / fontes / tutoriais completos', 'Prioridade na fila'], cta: 'VIRAR PRO', highlight: 'pro' },
-      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mês', tagline: 'Pra quem vive disso. Pro + revisão humana incluída.', features: ['Tudo do Pro, ilimitado', 'Revisão humana do clip', 'Roteiro de edição com timestamps', 'Prioridade máxima na fila', 'Benchmark com virais do nicho'], cta: 'ENTRAR NO ELITE', highlight: 'elite' },
+      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mês', tagline: 'Pra quem vive disso. Pro + revisão humana incluída.', features: ['Tudo do Pro, ilimitado', 'Revisão humana do clip', 'Roteiro de edição com timestamps', 'Prioridade máxima na fila', 'Benchmark com virais do nicho', 'Acesso ao grupo privado no Telegram 💬'], cta: 'ENTRAR NO ELITE', highlight: 'elite' },
     ],
   },
   social: {
@@ -264,7 +264,7 @@ const en: Translations = {
       { id: 'free', name: 'FREE', price: '0€', cadence: '/day', tagline: '1 analysis per day, resets every 24h. No card.', features: ['1 analysis / day (24h reset)', '6 pillars frame by frame + evidence', 'Retention diagnosis', 'Verdict + bottleneck', 'Growth strategies'], cta: 'START FOR FREE' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mo', tagline: 'For those starting to post with direction every month.', features: ['10 analyses / month', '6 pillars + evidence + retention', 'Verdict + bottleneck', 'Up to 3 priority corrections', '1 audio / source / tutorial'], cta: 'GET STARTER' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mo', tagline: 'For the clipper who lives to post and wants to go viral.', features: ['UNLIMITED analyses', 'Complete priority corrections', 'Growth strategies', 'Full audios / sources / tutorials', 'Priority queue'], cta: 'GO PRO', highlight: 'pro' },
-      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mo', tagline: 'For those who live off this. Pro + human review included.', features: ['Everything in Pro, unlimited', 'Human clip review', 'Editing script with timestamps', 'Maximum priority queue', 'Benchmark with niche virals'], cta: 'JOIN ELITE', highlight: 'elite' },
+      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mo', tagline: 'For those who live off this. Pro + human review included.', features: ['Everything in Pro, unlimited', 'Human clip review', 'Editing script with timestamps', 'Maximum priority queue', 'Benchmark with niche virals', 'Access to private Telegram group 💬'], cta: 'JOIN ELITE', highlight: 'elite' },
     ],
   },
   social: {
@@ -386,7 +386,7 @@ const es: Translations = {
       { id: 'free', name: 'FREE', price: '0€', cadence: '/día', tagline: '1 análisis por día, reset cada 24h. Sin tarjeta.', features: ['1 análisis / día (reset 24h)', '6 pilares fotograma a fotograma + evidencia', 'Diagnóstico de retención', 'Veredicto + cuello de botella', 'Estrategias de crecimiento'], cta: 'EMPEZAR GRATIS' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mes', tagline: 'Para empezar a publicar con dirección cada mes.', features: ['10 análisis / mes', '6 pilares + evidencia + retención', 'Veredicto + cuello de botella', 'Hasta 3 correcciones prioritarias', '1 audio / fuente / tutorial'], cta: 'SUSCRIBIRSE' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mes', tagline: 'Para el clipper que vive de publicar y quiere explotar.', features: ['Análisis ILIMITADOS', 'Correcciones prioritarias completas', 'Estrategias de crecimiento', 'Audios / fuentes / tutoriales completos', 'Cola prioritaria'], cta: 'HACERSE PRO', highlight: 'pro' },
-      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mes', tagline: 'Para quienes viven de esto. Pro + revisión humana incluida.', features: ['Todo de Pro, ilimitado', 'Revisión humana del clip', 'Guión de edición con timestamps', 'Cola de máxima prioridad', 'Benchmark con virales del nicho'], cta: 'UNIRSE AL ELITE', highlight: 'elite' },
+      { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mes', tagline: 'Para quienes viven de esto. Pro + revisión humana incluida.', features: ['Todo de Pro, ilimitado', 'Revisión humana del clip', 'Guión de edición con timestamps', 'Cola de máxima prioridad', 'Benchmark con virales del nicho', 'Acceso al grupo privado de Telegram 💬'], cta: 'UNIRSE AL ELITE', highlight: 'elite' },
     ],
   },
   social: {
