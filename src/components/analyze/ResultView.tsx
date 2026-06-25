@@ -4,7 +4,6 @@ import {
   type AiResult,
   type Topico,
   type Pilar,
-  TOPICOS_CONFIG,
   PILAR_LABEL,
   PILAR_ORDER,
   PILAR_WEIGHTS,
