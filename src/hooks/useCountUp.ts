@@ -5,7 +5,7 @@ import { useInView } from 'framer-motion';
  * Count-up for metrics. Fires once when scrolled into view, eases out, and
  * collapses to the final value immediately under reduced-motion.
  */
-export function useCountUp(target: number, duration = 2000) {
+export function useCountUp(target: number, duration = 4000) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '-15%' });
   const [value, setValue] = useState(0);

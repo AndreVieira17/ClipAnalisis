@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { Foil } from '@/components/ui/Foil';
 import { HeroMockup } from './HeroMockup';
 import { useAnalyzer } from '@/components/analyze/AnalyzerContext';
 import { useI18n } from '@/lib/i18n';
+import { charRevealParent, charRevealChild, typewriterParent, typewriterChild } from '@/components/ui/motion-presets';
 
 export function Hero() {
   const { open } = useAnalyzer();
@@ -22,52 +22,66 @@ export function Hero() {
         <div className="relative z-10">
           <motion.span
             initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="chip inline-block rounded-full px-3 py-1"
           >
             {t.hero.chip}
           </motion.span>
 
-          <h1 className="mt-5 text-[clamp(2.6rem,8vw,5.6rem)] leading-[0.92]" style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            <motion.span
-              className="block text-text"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 }}
-            >
-              {t.hero.line1}
-            </motion.span>
-            <motion.span
-              className="block"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.12 }}
-            >
-              <Foil sheen className="num-glow">{t.hero.line2}</Foil>
-            </motion.span>
-            <motion.span
-              className="block text-text"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.19 }}
-            >
-              {t.hero.line3}
-            </motion.span>
-          </h1>
+          <motion.h1
+            className="mt-5 text-[clamp(2.6rem,8vw,5.6rem)] leading-[0.92]"
+            style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}
+            variants={charRevealParent}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
+            {/* Line 1 — plain */}
+            <span className="block text-text">
+              {[...t.hero.line1].map((ch, i) => (
+                <motion.span key={`l1-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
+                  {ch === ' ' ? null : ch}
+                </motion.span>
+              ))}
+            </span>
+            {/* Line 2 — gold foil applied per-char (Foil not used to preserve stagger) */}
+            <span className="block num-glow">
+              {[...t.hero.line2].map((ch, i) => (
+                <motion.span key={`l2-${i}`} variants={charRevealChild} className={`inline-block gold-foil${ch === ' ' ? ' w-[0.3em]' : ''}`}>
+                  {ch === ' ' ? null : ch}
+                </motion.span>
+              ))}
+            </span>
+            {/* Line 3 — plain */}
+            <span className="block text-text">
+              {[...t.hero.line3].map((ch, i) => (
+                <motion.span key={`l3-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
+                  {ch === ' ' ? null : ch}
+                </motion.span>
+              ))}
+            </span>
+          </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.28 }}
             className="mt-6 max-w-md text-base text-muted sm:text-lg"
+            variants={typewriterParent}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
           >
-            {t.hero.subtitle}
+            {t.hero.subtitle.split(' ').map((word, i) => (
+              <motion.span key={i} variants={typewriterChild} className="inline-block mr-[0.28em]">
+                {word}
+              </motion.span>
+            ))}
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.36 }}
             className="mt-8 flex flex-wrap items-center gap-3"
           >
