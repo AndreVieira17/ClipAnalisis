@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Reveal } from '@/components/ui/Reveal';
-import { FAQ } from '@/content';
+import { useI18n } from '@/lib/i18n';
 
 function Item({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -39,14 +39,15 @@ function Item({ q, a }: { q: string; a: string }) {
 }
 
 export function Faq() {
+  const { t } = useI18n();
   return (
     <section id="faq" className="mx-auto max-w-3xl px-5 py-24 sm:px-8 sm:py-32">
       <Reveal>
-        <span className="chip rounded-full px-3 py-1">DÚVIDAS</span>
-        <h2 className="mt-4 text-[clamp(2rem,5vw,3.4rem)]">FAQ</h2>
+        <span className="chip rounded-full px-3 py-1">{t.faq.chip}</span>
+        <h2 className="mt-4 text-[clamp(2rem,5vw,3.4rem)]">{t.faq.title}</h2>
       </Reveal>
       <Reveal className="mt-8">
-        {FAQ.map((f) => (
+        {t.faq.items.map((f) => (
           <Item key={f.q} q={f.q} a={f.a} />
         ))}
       </Reveal>

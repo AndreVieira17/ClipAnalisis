@@ -1,15 +1,56 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Zap, AlertTriangle } from 'lucide-react';
+import { Check, Zap, AlertTriangle, Clock, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { uploadVideo, runAnalysis, validateVideo, LIMITS } from '@/lib/analyze';
+import { uploadVideo, runAnalysis, validateVideo, getQuota, LIMITS } from '@/lib/analyze';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { UpgradeModal } from '@/components/ui/UpgradeModal';
 import { useAppToast } from '@/hooks/useAppToast';
 import { cn, formatBytes } from '@/lib/utils';
 
 type Step = 1 | 2 | 3;
 const PLATFORMS = ['TikTok', 'Reels', 'Shorts'] as const;
+
+/** Countdown that ticks every second from a target Date. Returns "HH:MM:SS" or null when done. */
+function useCountdown(target: Date | null): string | null {
+  const calc = useCallback(() => {
+    if (!target) return null;
+    const diff = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
+    if (diff === 0) return null;
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }, [target]);
+
+  const [display, setDisplay] = useState<string | null>(calc);
+  useEffect(() => {
+    setDisplay(calc());
+    const id = setInterval(() => setDisplay(calc()), 1000);
+    return () => clearInterval(id);
+  }, [calc]);
+  return display;
+}
+
+function QuotaBanner({ nextResetAt }: { nextResetAt: Date }) {
+  const countdown = useCountdown(nextResetAt);
+  if (!countdown) return null;
+  return (
+    <div className="flex items-center gap-3 rounded-[var(--app-radius-lg)] border border-amber-500/30 bg-amber-500/5 p-4 mb-6">
+      <Clock size={16} className="text-amber-500 shrink-0" />
+      <div>
+        <p className="font-inter font-semibold text-app-text-primary text-sm">
+          Limite diário atingido
+        </p>
+        <p className="font-inter text-app-text-muted text-xs mt-0.5">
+          Próxima análise disponível em{' '}
+          <span className="font-mono font-bold text-amber-400">{countdown}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function StepIndicator({ current }: { current: Step }) {
   const steps = ['Upload', 'Configurar', 'Analisar'];
@@ -44,7 +85,7 @@ function StepIndicator({ current }: { current: Step }) {
 }
 
 export default function Upload() {
-  const { session } = useAuth();
+  const { session, plan, subscriptionActive } = useAuth();
   const navigate = useNavigate();
   const { toast } = useAppToast();
 
@@ -58,6 +99,21 @@ export default function Upload() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState('');
+  const [nextResetAt, setNextResetAt] = useState<Date | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Check quota on mount for Free / Starter plans
+  useEffect(() => {
+    if (!session?.user || plan === 'pro' || plan === 'elite') return;
+    getQuota(session.user.id, plan).then((q) => {
+      if (q.nextResetAt) setNextResetAt(q.nextResetAt);
+    });
+  }, [session, plan]);
+
+  // Block if: free plan with daily quota used, OR paid plan with expired/missing subscription
+  const isQuotaBlocked = plan === 'free' && nextResetAt !== null;
+  const isSubBlocked = plan !== 'free' && !subscriptionActive;
+  const isBlocked = isQuotaBlocked || isSubBlocked;
 
   const handleVideoChange = async (f: File | null) => {
     setValidationError(null);
@@ -99,8 +155,9 @@ export default function Upload() {
         toast('Análise concluída! Raio-X pronto.', 'success');
         navigate(`/app/analysis/${outcome.analysisId}`);
       } else if (outcome.error === 'limit_reached') {
-        toast('Limite do plano atingido. Faz upgrade para continuar.', 'warning');
-        navigate('/app/settings');
+        const resetAt = (outcome as { next_reset_at?: string }).next_reset_at;
+        if (resetAt && plan === 'free') setNextResetAt(new Date(resetAt));
+        setShowUpgradeModal(true);
       } else if (outcome.error === 'gemini_overloaded') {
         toast(
           outcome.message ?? 'A IA está com muita procura. O teu clip foi guardado e a análise será feita em breve.',
@@ -124,11 +181,18 @@ export default function Upload() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason={isSubBlocked ? 'subscription_expired' : 'limit_reached'}
+      />
+
       <h1 className="font-grotesk font-bold text-app-text-primary text-2xl mb-2">Nova análise</h1>
       <p className="font-inter text-app-text-muted text-sm mb-8">
         Envia o teu clip e recebe o raio-X de viralização.
       </p>
 
+      {nextResetAt && <QuotaBanner nextResetAt={nextResetAt} />}
       <StepIndicator current={step} />
 
       {/* ── Step 1: Upload ── */}
@@ -294,10 +358,22 @@ export default function Upload() {
             <Button variant="secondary" size="lg" disabled={loading} onClick={() => setStep(2)} className="flex-1">
               Voltar
             </Button>
-            <Button variant="primary" size="lg" loading={loading} onClick={startAnalyze} className="flex-1 gap-2">
-              <Zap size={16} />
-              Analisar com Gemini
-            </Button>
+            {isBlocked ? (
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => setShowUpgradeModal(true)}
+                className="flex-1 gap-2 border-amber-500/40 text-amber-400 hover:border-amber-500/70"
+              >
+                <Lock size={16} />
+                {isSubBlocked ? 'Renovar subscrição' : 'Fazer upgrade'}
+              </Button>
+            ) : (
+              <Button variant="primary" size="lg" loading={loading} onClick={startAnalyze} className="flex-1 gap-2">
+                <Zap size={16} />
+                Analisar com Gemini
+              </Button>
+            )}
           </div>
         </div>
       )}

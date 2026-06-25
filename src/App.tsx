@@ -1,41 +1,30 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnalyzerProvider } from '@/components/analyze/AnalyzerContext';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { AuthGuard } from '@/components/auth/AuthGuard';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
+import { LanguageProvider } from '@/lib/i18n';
 
-// Landing — eager (it's the first thing users see)
 import Landing from '@/pages/Landing';
 
-// App pages — lazy loaded (only fetched after auth)
-const Auth         = lazy(() => import('@/pages/Auth'));
-const Dashboard    = lazy(() => import('@/pages/Dashboard'));
-const Upload       = lazy(() => import('@/pages/Upload'));
-const Library      = lazy(() => import('@/pages/Library'));
-const Settings     = lazy(() => import('@/pages/Settings'));
-const AnalysisView = lazy(() => import('@/pages/AnalysisView'));
+const Auth        = lazy(() => import('@/pages/Auth'));
+const Historico   = lazy(() => import('@/pages/Historico'));
+const AnaliseView = lazy(() => import('@/pages/AnaliseView'));
 
-function AppSuspense({ children }: { children: React.ReactNode }) {
+function Spinner() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-app-bg-primary flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full border-2 border-app-accent/30 border-t-app-accent animate-spin" />
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
+    <div className="min-h-screen bg-bg flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+    </div>
   );
 }
 
 export default function App() {
   return (
+    <LanguageProvider>
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          {/* ── Public ── */}
+          {/* ── Landing (com analyzer modal) ── */}
           <Route
             path="/"
             element={
@@ -44,86 +33,34 @@ export default function App() {
               </AnalyzerProvider>
             }
           />
+
+          {/* ── Auth ── */}
           <Route
             path="/auth"
             element={
-              <AppSuspense>
+              <Suspense fallback={<Spinner />}>
                 <Auth />
-              </AppSuspense>
+              </Suspense>
             }
           />
 
-          {/* ── Authenticated app ── */}
+          {/* ── Histórico de clips ── */}
           <Route
-            path="/app"
+            path="/historico"
             element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <Navigate to="/app/dashboard" replace />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
+              <Suspense fallback={<Spinner />}>
+                <Historico />
+              </Suspense>
             }
           />
+
+          {/* ── Resultado de uma análise específica ── */}
           <Route
-            path="/app/dashboard"
+            path="/analise/:id"
             element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <Dashboard />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/app/upload"
-            element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <Upload />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/app/library"
-            element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <Library />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/app/settings"
-            element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <Settings />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/app/analysis/:id"
-            element={
-              <AuthGuard>
-                <AppLayout>
-                  <AppSuspense>
-                    <AnalysisView />
-                  </AppSuspense>
-                </AppLayout>
-              </AuthGuard>
+              <Suspense fallback={<Spinner />}>
+                <AnaliseView />
+              </Suspense>
             }
           />
 
@@ -132,5 +69,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
+    </LanguageProvider>
   );
 }

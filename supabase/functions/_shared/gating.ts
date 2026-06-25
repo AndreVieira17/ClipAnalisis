@@ -6,8 +6,8 @@ import type { AiResult, PlanTier } from './types.ts';
 export function gateResult(full: AiResult, plan: PlanTier): AiResult {
   const r: AiResult = structuredClone(full);
 
-  // edit_plan: Elite only
-  if (plan !== 'elite') r.edit_plan = [];
+  // edit_plan + plano_acao_7dias: Elite only
+  if (plan !== 'elite') { r.edit_plan = []; r.plano_acao_7dias = []; }
 
   // estratégias de crescimento (bloco extra): free, pro, elite — NOT starter
   if (plan === 'starter') r.estrategias_crescimento = [];

@@ -1,29 +1,34 @@
 // Edge Function: stripe-webhook  (verify_jwt = false — Stripe signs the payload)
-// Listens for Stripe events and keeps the Supabase `profiles.plan` + `subscriptions` in sync.
+// Listens for Stripe events and keeps profiles.plan + subscriptions in sync.
+// Sets subscription_start_date / subscription_end_date (+30 days) on every payment.
 import Stripe from 'https://esm.sh/stripe@14?target=deno';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')!;
+const SUPABASE_URL          = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_ROLE          = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const STRIPE_SECRET_KEY     = Deno.env.get('STRIPE_SECRET_KEY')!;
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 
 type PlanTier = 'free' | 'starter' | 'pro' | 'elite';
 
-// Map Stripe Price IDs back to plan tiers
 const PRICE_TO_PLAN: Record<string, PlanTier> = {
   [Deno.env.get('STRIPE_PRICE_STARTER') ?? '__starter__']: 'starter',
   [Deno.env.get('STRIPE_PRICE_PRO')     ?? '__pro__']:     'pro',
   [Deno.env.get('STRIPE_PRICE_ELITE')   ?? '__elite__']:   'elite',
 };
 
+/** +30 days from now as ISO string */
+function thirtyDaysFromNow(from = new Date()): string {
+  return new Date(from.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
 
   const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-04-10' });
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+  const admin  = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // ---- 1. Verify Stripe signature ----------------------------------------
   const signature = req.headers.get('stripe-signature') ?? '';
@@ -44,6 +49,12 @@ Deno.serve(async (req) => {
         await handleCheckoutCompleted(admin, stripe, session);
         break;
       }
+      case 'invoice.payment_succeeded': {
+        // Renewal: extend the 30-day window
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentSucceeded(admin, invoice);
+        break;
+      }
       case 'customer.subscription.updated': {
         const sub = event.data.object as Stripe.Subscription;
         await handleSubscriptionChange(admin, sub);
@@ -60,7 +71,6 @@ Deno.serve(async (req) => {
         break;
       }
       default:
-        // Ignore unhandled events
         break;
     }
   } catch (err) {
@@ -79,28 +89,67 @@ async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session,
 ) {
   const userId = session.metadata?.user_id;
-  const plan = (session.metadata?.plan ?? 'free') as PlanTier;
+  const plan   = (session.metadata?.plan ?? 'free') as PlanTier;
   if (!userId) return;
 
+  const now           = new Date();
+  const endDate       = thirtyDaysFromNow(now);
   const subscriptionId = session.subscription as string | null;
 
-  // Upgrade the user's plan
+  // Upgrade profiles.plan
   await admin.from('profiles').update({ plan }).eq('id', userId);
 
-  // Upsert subscription record
   if (subscriptionId) {
-    const sub = await stripe.subscriptions.retrieve(subscriptionId);
+    const sub     = await stripe.subscriptions.retrieve(subscriptionId);
     const priceId = sub.items.data[0]?.price.id ?? '';
+
     await admin.from('subscriptions').upsert({
-      id: subscriptionId,
-      user_id: userId,
+      id:                     subscriptionId,
+      user_id:                userId,
       plan,
-      price_id: priceId,
-      stripe_customer_id: session.customer as string,
-      status: sub.status,
-      current_period_start: new Date((sub.current_period_start ?? 0) * 1000).toISOString(),
-      current_period_end: new Date((sub.current_period_end ?? 0) * 1000).toISOString(),
+      price_id:               priceId,
+      stripe_customer_id:     session.customer as string,
+      status:                 sub.status,
+      current_period_start:   new Date((sub.current_period_start ?? 0) * 1000).toISOString(),
+      current_period_end:     new Date((sub.current_period_end   ?? 0) * 1000).toISOString(),
+      subscription_start_date: now.toISOString(),
+      subscription_end_date:  endDate,
+      daily_analyses_used:    0,
+      last_daily_reset:       now.toISOString(),
     }, { onConflict: 'id' });
+  }
+}
+
+async function handleInvoicePaymentSucceeded(
+  admin: ReturnType<typeof createClient>,
+  invoice: Stripe.Invoice,
+) {
+  const subscriptionId = invoice.subscription as string | null;
+  if (!subscriptionId) return;
+
+  // Skip the initial invoice (checkout.session.completed already handles it)
+  if (invoice.billing_reason === 'subscription_create') return;
+
+  const now     = new Date();
+  const endDate = thirtyDaysFromNow(now);
+
+  await admin.from('subscriptions').update({
+    status:                  'active',
+    subscription_start_date: now.toISOString(),
+    subscription_end_date:   endDate,
+    daily_analyses_used:     0,
+    last_daily_reset:        now.toISOString(),
+  }).eq('id', subscriptionId);
+
+  // Also ensure profiles.plan is still set correctly (in case it was downgraded)
+  const { data: sub } = await admin
+    .from('subscriptions')
+    .select('user_id, plan')
+    .eq('id', subscriptionId)
+    .maybeSingle();
+
+  if (sub?.user_id && sub?.plan) {
+    await admin.from('profiles').update({ plan: sub.plan }).eq('id', sub.user_id);
   }
 }
 
@@ -108,7 +157,7 @@ async function handleSubscriptionChange(
   admin: ReturnType<typeof createClient>,
   sub: Stripe.Subscription,
 ) {
-  const userId = sub.metadata?.user_id;
+  const userId  = sub.metadata?.user_id;
   if (!userId) return;
 
   const priceId = sub.items.data[0]?.price.id ?? '';
@@ -116,14 +165,14 @@ async function handleSubscriptionChange(
 
   await admin.from('profiles').update({ plan }).eq('id', userId);
   await admin.from('subscriptions').upsert({
-    id: sub.id,
-    user_id: userId,
+    id:                   sub.id,
+    user_id:              userId,
     plan,
-    price_id: priceId,
-    stripe_customer_id: sub.customer as string,
-    status: sub.status,
+    price_id:             priceId,
+    stripe_customer_id:   sub.customer as string,
+    status:               sub.status,
     current_period_start: new Date((sub.current_period_start ?? 0) * 1000).toISOString(),
-    current_period_end: new Date((sub.current_period_end ?? 0) * 1000).toISOString(),
+    current_period_end:   new Date((sub.current_period_end   ?? 0) * 1000).toISOString(),
     cancel_at_period_end: sub.cancel_at_period_end,
   }, { onConflict: 'id' });
 }
@@ -135,9 +184,14 @@ async function handleSubscriptionDeleted(
   const userId = sub.metadata?.user_id;
   if (!userId) return;
 
-  // Downgrade to free on cancellation
+  const now = new Date().toISOString();
+
+  // Downgrade to free
   await admin.from('profiles').update({ plan: 'free' }).eq('id', userId);
-  await admin.from('subscriptions').update({ status: 'canceled' }).eq('id', sub.id);
+  await admin.from('subscriptions').update({
+    status:               'canceled',
+    subscription_end_date: now,
+  }).eq('id', sub.id);
 }
 
 async function handlePaymentFailed(

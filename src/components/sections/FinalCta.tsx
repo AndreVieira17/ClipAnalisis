@@ -2,9 +2,11 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Foil } from '@/components/ui/Foil';
 import { PopCard } from '@/components/ui/PopCard';
 import { useAnalyzer } from '@/components/analyze/AnalyzerContext';
+import { useI18n } from '@/lib/i18n';
 
 export function FinalCta() {
   const { open } = useAnalyzer();
+  const { t } = useI18n();
   return (
     <section className="scanlines relative overflow-hidden px-5 py-28 sm:px-8 sm:py-40">
       <div
@@ -14,21 +16,21 @@ export function FinalCta() {
       />
       <Reveal className="mx-auto max-w-4xl text-center">
         <h2 className="text-[clamp(2.6rem,10vw,7rem)] leading-[0.9]">
-          PARA DE <Foil sheen className="num-glow">CHUTAR</Foil>.
+          {t.finalCta.line1a} <Foil sheen className="num-glow">{t.finalCta.line1b}</Foil>.
           <br />
-          COMEÇA A <Foil sheen className="num-glow">ESTOURAR</Foil>.
+          {t.finalCta.line2a} <Foil sheen className="num-glow">{t.finalCta.line2b}</Foil>.
         </h2>
         <p className="mx-auto mt-6 max-w-md text-muted">
-          Manda o vídeo + o print agora. O primeiro raio-X é de graça.
+          {t.finalCta.subtitle}
         </p>
         <div className="mt-10 inline-block">
           <PopCard
             intensity="strong"
             as="button"
             onClick={() => open()}
-            className="btn-gold gold-glow rounded-xzk px-10 py-5 text-lg"
+            className="btn-gold gold-glow rounded-xzk px-10 py-5 text-lg transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
           >
-            ANALISAR MEU CLIP GRÁTIS
+            {t.finalCta.cta}
           </PopCard>
         </div>
       </Reveal>

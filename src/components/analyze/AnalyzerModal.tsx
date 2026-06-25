@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAnalyzer } from './AnalyzerContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,12 +9,28 @@ import { AuthGate } from './AuthGate';
 import { UploadForm, type AnalyzeInput } from './UploadForm';
 import { ResultView } from './ResultView';
 
-type Step = 'upload' | 'uploading' | 'processing' | 'result' | 'limit' | 'error';
+type Step = 'checking' | 'upload' | 'uploading' | 'processing' | 'result' | 'limit' | 'expired' | 'error';
 
-const LIMIT_COPY: Record<string, string> = {
-  free: 'Já usaste a tua análise gratuita hoje. Assina um plano para continuar.',
-  starter: 'Atingiste o limite de 10 análises este mês. Faz upgrade para Pro.',
-};
+/** Countdown hook — ticks every second, returns "HH:MM:SS" or null when done */
+function useCountdown(target: Date | null): string | null {
+  const calc = useCallback(() => {
+    if (!target) return null;
+    const diff = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
+    if (diff === 0) return null;
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }, [target]);
+
+  const [display, setDisplay] = useState<string | null>(calc);
+  useEffect(() => {
+    setDisplay(calc());
+    const id = setInterval(() => setDisplay(calc()), 1000);
+    return () => clearInterval(id);
+  }, [calc]);
+  return display;
+}
 
 function Processing({ step }: { step: 'uploading' | 'processing' }) {
   return (
@@ -37,44 +53,161 @@ function Processing({ step }: { step: 'uploading' | 'processing' }) {
   );
 }
 
+/** Free plan — daily limit countdown */
+function scrollToPlanos() {
+  document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function FreeLimitBanner({ nextResetAt, onClose }: { nextResetAt: Date; onClose: () => void }) {
+  const countdown = useCountdown(nextResetAt);
+  return (
+    <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-gold/5 p-6 text-center relative">
+      <button
+        onClick={onClose}
+        aria-label="Fechar"
+        className="absolute top-3 right-3 w-7 h-7 rounded-full border border-border bg-surface/60 flex items-center justify-center text-muted hover:text-gold-hi hover:border-gold/40 transition-colors text-xs"
+      >
+        ✕
+      </button>
+      <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-gold mb-3">
+        LIMITE DIÁRIO ATINGIDO
+      </p>
+      <p className="text-sm text-muted mb-4">
+        Já usaste a tua análise gratuita hoje. Próxima análise disponível em:
+      </p>
+      {countdown ? (
+        <div className="font-mono text-4xl font-bold text-gold tabular-nums mb-6">
+          {countdown}
+        </div>
+      ) : (
+        <p className="font-mono text-gold text-lg mb-6">Disponível agora!</p>
+      )}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onClick={onClose} className="btn-ghost rounded-xzk px-5 py-2.5 text-sm font-semibold order-2 sm:order-1">
+          ← Voltar
+        </button>
+        <button onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }} className="btn-gold rounded-xzk px-6 py-2.5 text-sm order-1 sm:order-2">
+          VER PLANOS — ANALISAR SEM LIMITES
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Starter plan — daily limit (5/day) */
+function StarterLimitBanner({ nextResetAt, onClose }: { nextResetAt: Date | null; onClose: () => void }) {
+  const countdown = useCountdown(nextResetAt);
+  return (
+    <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-gold/5 p-6 text-center relative">
+      <button
+        onClick={onClose}
+        aria-label="Fechar"
+        className="absolute top-3 right-3 w-7 h-7 rounded-full border border-border bg-surface/60 flex items-center justify-center text-muted hover:text-gold-hi hover:border-gold/40 transition-colors text-xs"
+      >
+        ✕
+      </button>
+      <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-gold mb-3">
+        LIMITE DIÁRIO DO PLANO STARTER
+      </p>
+      <p className="text-sm text-muted mb-4">
+        Atingiste as 5 análises de hoje. Volta amanhã ou faz upgrade para Pro para análises ilimitadas.
+      </p>
+      {countdown && (
+        <div className="font-mono text-3xl font-bold text-gold tabular-nums mb-4">
+          {countdown}
+        </div>
+      )}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onClick={onClose} className="btn-ghost rounded-xzk px-5 py-2.5 text-sm font-semibold order-2 sm:order-1">
+          ← Voltar
+        </button>
+        <button onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }} className="btn-gold rounded-xzk px-6 py-2.5 text-sm order-1 sm:order-2">
+          UPGRADE PARA PRO
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Paid plan expired */
+function SubscriptionExpiredBanner({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="mx-auto max-w-md rounded-xzk border border-danger/40 bg-danger/5 p-6 text-center relative">
+      <button
+        onClick={onClose}
+        aria-label="Fechar"
+        className="absolute top-3 right-3 w-7 h-7 rounded-full border border-border bg-surface/60 flex items-center justify-center text-muted hover:text-danger hover:border-danger/40 transition-colors text-xs"
+      >
+        ✕
+      </button>
+      <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-danger mb-3">
+        SUBSCRIÇÃO EXPIRADA
+      </p>
+      <h3 className="text-2xl mb-3">O teu plano expirou</h3>
+      <p className="text-sm text-muted mb-6">
+        O teu plano pago expirou. Renova agora para continuar a analisar os teus clips sem limites.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onClick={onClose} className="btn-ghost rounded-xzk px-5 py-2.5 text-sm font-semibold order-2 sm:order-1">
+          ← Voltar
+        </button>
+        <button onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }} className="btn-gold rounded-xzk px-6 py-2.5 text-sm order-1 sm:order-2">
+          RENOVAR PLANO
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AnalyzerModal() {
   const { isOpen, close } = useAnalyzer();
   const { session, plan, loading } = useAuth();
-  const [step, setStep] = useState<Step>('upload');
-  const [result, setResult] = useState<AiResult | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [limitPlan, setLimitPlan] = useState<string>('free');
+  const [step, setStep]             = useState<Step>('checking');
+  const [result, setResult]         = useState<AiResult | null>(null);
+  const [errorMsg, setErrorMsg]     = useState<string | null>(null);
+  const [limitPlan, setLimitPlan]   = useState<string>('free');
+  const [nextResetAt, setNextResetAt] = useState<Date | null>(null);
 
-  // Pre-check quota before the user even starts uploading
+  // Reset to checking whenever the modal opens so we always re-verify quota on open
   useEffect(() => {
-    if (!isOpen || !session?.user || loading || step !== 'upload') return;
+    if (isOpen) setStep('checking');
+  }, [isOpen]);
+
+  // Pre-check quota — runs when modal opens (step = 'checking') and auth is ready
+  useEffect(() => {
+    if (!isOpen || !session?.user || loading || step !== 'checking') return;
     let cancelled = false;
     getQuota(session.user.id, plan).then((q) => {
       if (cancelled) return;
+      if (q.expired) {
+        setStep('expired');
+        return;
+      }
       if (q.remaining !== null && q.remaining <= 0) {
+        setNextResetAt(q.nextResetAt);
         setLimitPlan(plan);
         setStep('limit');
+        return;
       }
+      setStep('upload');
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, session, plan, loading]);
+  }, [isOpen, session, plan, loading, step]);
 
   const run = async (input: AnalyzeInput) => {
     if (!session?.user) return;
     setErrorMsg(null);
 
     try {
-      // Step A: upload the video file
       setStep('uploading');
       const videoPath = await uploadVideo(session.user.id, input.video);
 
-      // Step B: edge function runs Gemini + inserts row
       setStep('processing');
       const outcome = await runAnalysis({
         videoPath,
-        tema: input.tema,
-        duracao: input.duracao,
+        tema:     input.tema,
+        duracao:  input.duracao,
         platform: input.platform,
       });
 
@@ -83,15 +216,35 @@ export default function AnalyzerModal() {
         setStep('result');
         return;
       }
-      if (outcome.error === 'limit_reached') {
-        setLimitPlan(plan);
+
+      // ---- Error handling ---------------------------------------------------
+      const err = outcome.error ?? '';
+
+      if (err === 'subscription_expired') {
+        setStep('expired');
+        return;
+      }
+
+      if (err === 'limit_free' || err === 'limit_reached') {
+        const resetAt = outcome.next_reset_at ?? (outcome as { next_reset_at?: string }).next_reset_at;
+        if (resetAt) setNextResetAt(new Date(resetAt));
+        setLimitPlan('free');
         setStep('limit');
         return;
       }
+
+      if (err === 'limit_starter_daily') {
+        const resetAt = outcome.next_reset_at;
+        if (resetAt) setNextResetAt(new Date(resetAt));
+        setLimitPlan('starter');
+        setStep('limit');
+        return;
+      }
+
       setErrorMsg(
-        outcome.error === 'gemini_overloaded'
-          ? (outcome.message ?? 'A IA está com muita procura agora. O teu clip foi guardado e a análise será feita automaticamente em breve. Não perdes a tua análise.')
-          : (outcome.error ?? 'Não consegui concluir a análise. Tenta de novo.'),
+        err === 'gemini_overloaded'
+          ? (outcome.message ?? 'A IA está com muita procura agora. O teu clip foi guardado e a análise será feita automaticamente em breve.')
+          : (err || 'Não consegui concluir a análise. Tenta de novo.'),
       );
       setStep('error');
     } catch (err) {
@@ -100,7 +253,7 @@ export default function AnalyzerModal() {
     }
   };
 
-  const reset = () => { setResult(null); setStep('upload'); };
+  const reset = () => { setResult(null); setNextResetAt(null); setLimitPlan('free'); setStep('checking'); };
 
   return (
     <AnimatePresence>
@@ -141,17 +294,13 @@ export default function AnalyzerModal() {
                 <div className="mx-auto max-w-md rounded-xzk border border-border bg-surface/40 p-6 text-center">
                   <h3 className="text-2xl">BACKEND NÃO CONFIGURADO</h3>
                   <p className="mt-3 text-sm text-muted">{supabaseNotReadyReason}</p>
-                  <p className="mt-2 text-xs text-muted/60">
-                    Verifica <code className="text-gold">.env.local</code> —{' '}
-                    <code className="text-gold">VITE_SUPABASE_URL</code> deve ser{' '}
-                    <code className="text-gold">https://xxxx.supabase.co</code> e{' '}
-                    <code className="text-gold">VITE_SUPABASE_ANON_KEY</code> começa com "eyJ".
-                  </p>
                 </div>
               ) : loading ? (
                 <p className="py-16 text-center text-muted">Carregando...</p>
               ) : !session ? (
                 <AuthGate />
+              ) : step === 'checking' ? (
+                <p className="py-16 text-center text-muted">Carregando...</p>
               ) : step === 'upload' ? (
                 <UploadForm onSubmit={run} />
               ) : step === 'uploading' || step === 'processing' ? (
@@ -159,18 +308,38 @@ export default function AnalyzerModal() {
               ) : step === 'result' && result ? (
                 <div>
                   <ResultView result={result} />
-                  <button onClick={reset} className="btn-ghost mt-10 w-full rounded-xzk px-6 py-3 font-semibold">
-                    ANALISAR OUTRO CLIP
-                  </button>
+                  {plan === 'free' ? (
+                    <div className="mt-10">
+                      <FreeLimitBanner
+                        nextResetAt={(() => { const t = new Date(); t.setUTCDate(t.getUTCDate() + 1); t.setUTCHours(0, 0, 0, 0); return t; })()}
+                        onClose={close}
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setResult(null); setNextResetAt(null); setLimitPlan('free'); setStep('upload'); }}
+                      className="btn-ghost mt-10 w-full rounded-xzk px-6 py-3 font-semibold"
+                    >
+                      ANALISAR OUTRO CLIP
+                    </button>
+                  )}
                 </div>
+              ) : step === 'expired' ? (
+                <SubscriptionExpiredBanner onClose={close} />
               ) : step === 'limit' ? (
-                <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-surface/40 p-6 text-center">
-                  <h3 className="text-2xl">LIMITE DO PLANO</h3>
-                  <p className="mt-3 text-sm text-muted">{LIMIT_COPY[limitPlan] ?? 'Limite atingido.'}</p>
-                  <a href="#planos" onClick={close} className="btn-gold mt-5 inline-block rounded-xzk px-6 py-3">
-                    VER PLANOS
-                  </a>
-                </div>
+                limitPlan === 'starter' ? (
+                  <StarterLimitBanner nextResetAt={nextResetAt} onClose={close} />
+                ) : (
+                  nextResetAt ? (
+                    <FreeLimitBanner nextResetAt={nextResetAt} onClose={close} />
+                  ) : (
+                    <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-surface/40 p-6 text-center">
+                      <h3 className="text-2xl">LIMITE ATINGIDO</h3>
+                      <p className="mt-3 text-sm text-muted">Atingiste o limite do plano. Faz upgrade para continuar.</p>
+                      <button onClick={() => { close(); setTimeout(scrollToPlanos, 150); }} className="btn-gold mt-5 rounded-xzk px-6 py-3">VER PLANOS</button>
+                    </div>
+                  )
+                )
               ) : (
                 <div className="mx-auto max-w-md rounded-xzk border border-danger/40 bg-danger/5 p-6 text-center">
                   <h3 className="text-2xl text-danger">DEU RUIM</h3>

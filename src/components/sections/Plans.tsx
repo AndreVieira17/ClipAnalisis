@@ -1,9 +1,14 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Reveal } from '@/components/ui/Reveal';
 import { staggerParent, staggerChild } from '@/components/ui/motion-presets';
 import { PopCard } from '@/components/ui/PopCard';
 import { useAnalyzer } from '@/components/analyze/AnalyzerContext';
-import { PLANS, type Plan } from '@/content';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
+import { useI18n, type PlanT } from '@/lib/i18n';
 
 function Check() {
   return (
@@ -13,16 +18,69 @@ function Check() {
   );
 }
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
   const { open } = useAnalyzer();
-  const pro = plan.highlight === 'pro';
-  const elite = plan.highlight === 'elite';
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const isPaid = plan.id !== 'free';
+  const pro    = plan.highlight === 'pro';
+  const elite  = plan.highlight === 'elite';
+
+  async function handleClick() {
+    setCheckoutError(null);
+
+    if (!isPaid) {
+      // Free plan — just open the analyzer
+      open(plan.id);
+      return;
+    }
+
+    if (!session) {
+      // Not logged in — redirect to auth
+      navigate('/auth');
+      return;
+    }
+
+    // Paid plan + logged in → create Stripe Checkout session
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan: plan.id },
+      });
+
+      if (error) {
+        const msg = error.message ?? '';
+        if (msg.includes('Failed to send') || msg.includes('not found') || msg.includes('relay')) {
+          setCheckoutError('Edge Function não deployada. Corre: npx supabase functions deploy create-checkout');
+        } else if (data?.error === 'price_not_configured') {
+          setCheckoutError(`Price ID do plano "${plan.id}" não configurado nos Secrets.`);
+        } else {
+          setCheckoutError(msg || 'Erro ao iniciar o pagamento.');
+        }
+        return;
+      }
+
+      if (!data?.url) {
+        setCheckoutError('Não foi possível obter o URL do Stripe.');
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Erro inesperado.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <PopCard
       intensity={pro ? 'strong' : 'soft'}
       className={[
-        'flex h-full flex-col rounded-xzk-lg p-7',
+        'flex h-full flex-col rounded-xzk-lg p-7 transition-all duration-500 ease-out hover:scale-[1.03] hover:shadow-[0_8px_40px_rgba(212,175,55,0.25)]',
         elite
           ? 'border border-gold/40 bg-gradient-to-b from-[#15130c] to-bg shadow-gold-strong'
           : pro
@@ -32,7 +90,7 @@ function PlanCard({ plan }: { plan: Plan }) {
     >
       {pro && (
         <span className="absolute -top-3 left-7 btn-gold rounded-full px-3 py-1 text-[0.65rem]">
-          MAIS ESCOLHIDO
+          {mostChosen}
         </span>
       )}
       <div className="flex items-baseline justify-between">
@@ -54,27 +112,39 @@ function PlanCard({ plan }: { plan: Plan }) {
         ))}
       </ul>
 
+      {checkoutError && (
+        <p className="mt-3 rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger leading-snug">
+          {checkoutError}
+        </p>
+      )}
+
       <button
         type="button"
-        onClick={() => open(plan.id)}
+        onClick={handleClick}
+        disabled={loading}
         className={[
-          'mt-7 block w-full rounded-xzk px-5 py-3 text-center text-sm transition-transform',
+          'mt-7 flex w-full items-center justify-center gap-2 rounded-xzk px-5 py-3 text-center text-sm transition-transform disabled:opacity-60',
           pro || elite ? 'btn-gold' : 'btn-ghost font-semibold',
         ].join(' ')}
       >
-        {plan.cta}
+        {loading ? (
+          <><Loader2 size={14} className="animate-spin" /> A redirecionar…</>
+        ) : (
+          plan.cta
+        )}
       </button>
     </PopCard>
   );
 }
 
 export function Plans() {
+  const { t } = useI18n();
   return (
     <section id="planos" className="relative mx-auto max-w-[var(--maxw)] px-5 py-24 sm:px-8 sm:py-32">
       <Reveal className="text-center">
-        <span className="chip rounded-full px-3 py-1">PLANOS</span>
+        <span className="chip rounded-full px-3 py-1">{t.plans.chip}</span>
         <h2 className="mx-auto mt-4 max-w-2xl text-[clamp(2rem,5vw,3.4rem)]">
-          Escolhe o teu <span className="gold-foil">nível</span> de clipador.
+          {t.plans.title} <span className="gold-foil">{t.plans.titleHighlight}</span>.
         </h2>
       </Reveal>
 
@@ -85,9 +155,9 @@ export function Plans() {
         viewport={{ once: true, margin: '-8%' }}
         className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {PLANS.map((p) => (
+        {t.plans.items.map((p) => (
           <motion.div key={p.name} variants={staggerChild} className="relative">
-            <PlanCard plan={p} />
+            <PlanCard plan={p} mostChosen={t.plans.mostChosen} />
           </motion.div>
         ))}
       </motion.div>

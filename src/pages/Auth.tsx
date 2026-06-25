@@ -24,21 +24,31 @@ export default function Auth() {
     setMessage(null);
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        setMessage({ text: error.message, type: 'error' });
+      const { error: signUpError } = await supabase.auth.signUp({ email, password });
+      if (signUpError) {
+        setMessage({ text: signUpError.message, type: 'error' });
       } else {
-        setMessage({
-          text: 'Conta criada! Verifica o teu email para confirmar, depois entra.',
-          type: 'success',
-        });
+        // Auto sign-in immediately after signup — no email confirmation required
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          // Signup worked but auto-login failed (e.g. email confirmation still enabled in Supabase)
+          setMessage({
+            text: 'Conta criada! Faz login para entrar.',
+            type: 'success',
+          });
+          setMode('login');
+        } else {
+          // Fire-and-forget — don't block navigation if email fails
+          supabase.functions.invoke('send-welcome-email', { body: { email } }).catch(() => {});
+          navigate('/', { replace: true });
+        }
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setMessage({ text: error.message, type: 'error' });
       } else {
-        navigate('/app/dashboard', { replace: true });
+        navigate('/', { replace: true });
       }
     }
     setLoading(false);

@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AnalysisCardSkeleton } from '@/components/ui/Skeleton';
 import { useAppToast } from '@/hooks/useAppToast';
-import { formatRelativeTime, cn } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
 import type { Analysis } from '@/types';
 
 type SortKey = 'date_desc' | 'date_asc' | 'score_desc';

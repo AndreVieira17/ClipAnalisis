@@ -2,9 +2,9 @@ import { supabase } from '@/lib/supabase';
 import type { AiResult, PlanTier } from '@/lib/analysis-types';
 
 export const LIMITS = {
-  videoMaxBytes: 100 * 1024 * 1024,
+  videoMaxBytes:   100 * 1024 * 1024,
   videoMaxSeconds: 90,
-  videoTypes: ['video/mp4', 'video/quicktime', 'video/webm'],
+  videoTypes:      ['video/mp4', 'video/quicktime', 'video/webm'],
 };
 
 /** Validates type/size and reads duration from a temporary <video>. Returns [error, durationSeconds]. */
@@ -56,9 +56,10 @@ export async function uploadVideo(userId: string, video: File): Promise<string> 
 export interface AnalyzeOutcome {
   ok: boolean;
   error?: string;
-  message?: string;      // human-readable message (e.g. gemini_overloaded)
+  message?: string;
   analysisId?: string;
   result?: AiResult;
+  next_reset_at?: string; // ISO — when the daily limit resets
 }
 
 /** Calls the edge function. It handles quota, runs Gemini, inserts the row, returns the result. */
@@ -71,71 +72,137 @@ export async function runAnalysis(params: {
   const { data, error } = await supabase.functions.invoke('analyze-clip', {
     body: {
       video_path: params.videoPath,
-      tema: params.tema || 'geral',
-      duracao: params.duracao || 0,
-      platform: params.platform || null,
+      tema:       params.tema     || 'geral',
+      duracao:    params.duracao  || 0,
+      platform:   params.platform || null,
     },
   });
 
   if (error) {
-    const ctx = (error as { context?: Response }).context;
+    const ctx    = (error as { context?: Response }).context;
     const status = ctx?.status ?? 0;
-    const msg = error.message ?? '';
+    const msg    = error.message ?? '';
 
     if (status === 404 || msg.includes('Failed to send') || msg.includes('relay') || msg.includes('not found')) {
       return {
         ok: false,
-        error:
-          'Edge Function não deployada — corre no terminal:\n  supabase functions deploy analyze-clip\n(ou Supabase → Edge Functions → Deploy)',
+        error: 'Edge Function não deployada — corre no terminal:\n  supabase functions deploy analyze-clip',
       };
     }
 
     if (ctx && typeof ctx.json === 'function') {
       try {
         const parsed = (await ctx.json()) as AnalyzeOutcome & { message?: string };
-        if (parsed?.error === 'gemini_overloaded') {
-          return { ok: false, error: 'gemini_overloaded', message: parsed.message };
+        // Propagate all known structured errors from the Edge Function
+        if (parsed?.error) {
+          return {
+            ok:           false,
+            error:        parsed.error,
+            message:      parsed.message,
+            next_reset_at: parsed.next_reset_at,
+          };
         }
-        if (parsed?.error) return { ok: false, error: parsed.error };
       } catch { /* fall through */ }
     }
     return { ok: false, error: `Falha: ${msg || 'erro desconhecido'}` };
   }
 
-  // Also handle gemini_overloaded returned as a successful HTTP response
   const outcome = data as AnalyzeOutcome & { message?: string };
-  if (outcome?.error === 'gemini_overloaded') {
-    return { ok: false, error: 'gemini_overloaded', message: outcome.message };
+
+  // Normalise: Edge Function returns ok=false with error codes
+  if (!outcome?.ok && outcome?.error) {
+    return {
+      ok:           false,
+      error:        outcome.error,
+      message:      outcome.message,
+      next_reset_at: outcome.next_reset_at,
+    };
   }
+
   return outcome;
 }
 
 export interface Quota {
-  remaining: number | null;
-  limit: number | null;
+  remaining:   number | null; // null = unlimited
+  limit:       number | null;
+  nextResetAt: Date | null;
+  expired?:    boolean;       // true if paid subscription has lapsed
 }
 
-/** Client-side quota mirror. Counts completed analyses (all rows = completed). */
+/** Client-side quota pre-check — reads subscriptions + profiles. Server is always authoritative. */
 export async function getQuota(userId: string, plan: PlanTier): Promise<Quota> {
-  if (plan === 'pro' || plan === 'elite') return { remaining: null, limit: null };
+  if (plan === 'pro' || plan === 'elite') {
+    // Unlimited — but check subscription expiry
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('subscription_end_date')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-  let q = supabase
-    .from('analyses')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    const endDate = sub?.subscription_end_date
+      ? new Date(sub.subscription_end_date as string)
+      : null;
 
-  if (plan === 'free') {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    q = q.gte('created_at', startOfDay.toISOString());
-  } else if (plan === 'starter') {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-    q = q.gte('created_at', startOfMonth.toISOString());
+    if (endDate && new Date() > endDate) {
+      return { remaining: 0, limit: 0, nextResetAt: null, expired: true };
+    }
+    return { remaining: null, limit: null, nextResetAt: null };
   }
 
-  const { count } = await q;
-  const limit = plan === 'starter' ? 10 : 1;
-  return { remaining: Math.max(limit - (count ?? 0), 0), limit };
+  if (plan === 'starter') {
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('subscription_end_date, daily_analyses_used, last_daily_reset')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    // Check expiry
+    const endDate = sub?.subscription_end_date
+      ? new Date(sub.subscription_end_date as string)
+      : null;
+    if (endDate && new Date() > endDate) {
+      return { remaining: 0, limit: 0, nextResetAt: null, expired: true };
+    }
+
+    const today     = new Date().toDateString();
+    const lastReset = sub?.last_daily_reset
+      ? new Date(sub.last_daily_reset as string).toDateString()
+      : null;
+    const dailyUsed = (lastReset === today)
+      ? ((sub?.daily_analyses_used as number) ?? 0)
+      : 0;
+
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+
+    return {
+      remaining:   Math.max(5 - dailyUsed, 0),
+      limit:       5,
+      nextResetAt: dailyUsed >= 5 ? tomorrow : null,
+    };
+  }
+
+  // Free: 1 per calendar day (resets at midnight UTC)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('last_analysis_at')
+    .eq('id', userId)
+    .single();
+
+  const lastAt = profile?.last_analysis_at as string | null;
+  if (!lastAt) return { remaining: 1, limit: 1, nextResetAt: null };
+
+  const todayMidnightUTC = new Date();
+  todayMidnightUTC.setUTCHours(0, 0, 0, 0);
+  const usedToday = new Date(lastAt) >= todayMidnightUTC;
+
+  const tomorrow = new Date(todayMidnightUTC);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+  return {
+    remaining:   usedToday ? 0 : 1,
+    limit:       1,
+    nextResetAt: usedToday ? tomorrow : null,
+  };
 }

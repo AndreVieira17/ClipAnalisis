@@ -35,8 +35,6 @@ export function formatRelativeTime(iso: string): string {
 
 export function statusLabel(status: AnalysisStatus): string {
   const map: Record<AnalysisStatus, string> = {
-    pending: 'A aguardar',
-    processing: 'A analisar',
     done: 'Analisado',
     error: 'Erro',
   };

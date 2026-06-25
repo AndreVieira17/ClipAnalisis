@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
@@ -16,11 +17,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { Toaster } from '@/components/ui/Toaster';
 import { AppToastContext } from '@/hooks/useAppToast';
+import { TopBar } from './TopBar';
 
 // ── Nav items ────────────────────────────────────────────────────────────────
 const NAV = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/app/upload',    icon: Upload,           label: 'Upload' },
+  { to: '/app/historico', icon: History,          label: 'Histórico' },
   { to: '/app/library',   icon: Library,          label: 'Library' },
   { to: '/app/settings',  icon: Settings,         label: 'Definições' },
 ] as const;
@@ -169,7 +172,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <AppToastContext.Provider value={{ toast: addToast }}>
-      <div className="min-h-screen bg-app-bg-primary font-inter text-app-text-primary">
+      <div className="app-root min-h-screen bg-app-bg-primary font-inter text-app-text-primary">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
 
         <main
@@ -178,6 +181,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             collapsed ? 'md:ml-16' : 'md:ml-[220px]',
           )}
         >
+          <TopBar />
           {children}
         </main>
 

@@ -3,25 +3,38 @@ import { Reveal } from '@/components/ui/Reveal';
 import { staggerParent, staggerChild } from '@/components/ui/motion-presets';
 import { PopCard } from '@/components/ui/PopCard';
 import { Stat } from '@/components/ui/Stat';
-import { ANALYZED } from '@/content';
+import { useI18n } from '@/lib/i18n';
+
+const STAT_VALUES = [
+  { value: 312, prefix: '+', suffix: '%', decimals: 0 },
+  { value: 9,   prefix: '',  suffix: ' pontos', decimals: 0 },
+  { value: 2,   prefix: '',  suffix: ' min', decimals: 0 },
+  { value: 1.2, prefix: '',  suffix: 'M', decimals: 1 },
+];
 
 export function Analyzed() {
+  const { t } = useI18n();
   return (
     <section id="analise" className="relative border-y border-border bg-bg-elev/40">
       <div className="mx-auto max-w-[var(--maxw)] px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="chip rounded-full px-3 py-1">O QUE É ANALISADO</span>
+          <span className="chip rounded-full px-3 py-1">{t.analyzed.chip}</span>
           <h2 className="mt-4 max-w-2xl text-[clamp(2rem,5vw,3.4rem)]">
-            Cada frame passa pelo <span className="gold-foil">raio-X</span>.
+            {t.analyzed.title} <span className="gold-foil">{t.analyzed.titleHighlight}</span>.
           </h2>
         </Reveal>
 
-        {/* métricas em count-up */}
         <div className="mt-12 grid grid-cols-2 gap-8 border-y border-border py-8 sm:grid-cols-4">
-          <Stat value={312} prefix="+" suffix="%" label="retenção média" />
-          <Stat value={9} suffix=" pontos" label="checados por clip" />
-          <Stat value={2} suffix=" min" label="pro raio-X sair" />
-          <Stat value={1.2} suffix="M" decimals={1} label="maior virada" />
+          {STAT_VALUES.map((sv, i) => (
+            <Stat
+              key={i}
+              value={sv.value}
+              prefix={sv.prefix}
+              suffix={sv.suffix}
+              decimals={sv.decimals}
+              label={t.analyzed.stats[i]?.label ?? ''}
+            />
+          ))}
         </div>
 
         <motion.div
@@ -31,7 +44,7 @@ export function Analyzed() {
           viewport={{ once: true, margin: '-8%' }}
           className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {ANALYZED.map((a) => (
+          {t.analyzed.cards.map((a) => (
             <motion.div key={a.tag} variants={staggerChild}>
               <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-6 transition-colors hover:border-gold/40">
                 <span className="chip rounded px-2 py-0.5">{a.tag}</span>

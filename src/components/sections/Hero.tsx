@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 import { Foil } from '@/components/ui/Foil';
 import { HeroMockup } from './HeroMockup';
 import { useAnalyzer } from '@/components/analyze/AnalyzerContext';
+import { useI18n } from '@/lib/i18n';
 
 export function Hero() {
   const { open } = useAnalyzer();
+  const { t } = useI18n();
 
   return (
     <section id="top" className="scanlines relative min-h-[100svh] overflow-hidden pt-28 sm:pt-32">
@@ -24,17 +26,17 @@ export function Hero() {
             transition={{ duration: 0.6 }}
             className="chip inline-block rounded-full px-3 py-1"
           >
-            RAIO-X DE VIRALIZAÇÃO
+            {t.hero.chip}
           </motion.span>
 
-          <h1 className="mt-5 text-[clamp(2.6rem,8vw,5.6rem)] leading-[0.92]">
+          <h1 className="mt-5 text-[clamp(2.6rem,8vw,5.6rem)] leading-[0.92]" style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             <motion.span
               className="block text-text"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.05 }}
             >
-              TEU CLIP NÃO
+              {t.hero.line1}
             </motion.span>
             <motion.span
               className="block"
@@ -42,7 +44,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.12 }}
             >
-              <Foil sheen className="num-glow">ESTOURA?</Foil>
+              <Foil sheen className="num-glow">{t.hero.line2}</Foil>
             </motion.span>
             <motion.span
               className="block text-text"
@@ -50,7 +52,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.19 }}
             >
-              A GENTE ACHA O QUE MATA.
+              {t.hero.line3}
             </motion.span>
           </h1>
 
@@ -60,8 +62,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.28 }}
             className="mt-6 max-w-md text-base text-muted sm:text-lg"
           >
-            Cola o link do TikTok, Reels ou Shorts — ou faz upload do vídeo. A ClipAnalisis faz o
-            raio-X frame a frame: o que prende, o que mata e o corte exato pra reeditar e viralizar.
+            {t.hero.subtitle}
           </motion.p>
 
           <motion.div
@@ -73,12 +74,12 @@ export function Hero() {
             <button
               type="button"
               onClick={() => open()}
-              className="btn-gold gold-glow rounded-xzk px-7 py-3.5 text-sm"
+              className="btn-gold gold-glow rounded-xzk px-7 py-3.5 text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
             >
-              Analisar meu clip
+              {t.hero.cta}
             </button>
             <a href="#como" className="btn-ghost rounded-xzk px-6 py-3.5 text-sm font-semibold">
-              Ver como funciona
+              {t.hero.ctaSecondary}
             </a>
           </motion.div>
         </div>

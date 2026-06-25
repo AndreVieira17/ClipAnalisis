@@ -1,17 +1,20 @@
 // Edge Function: analyze-clip  (verify_jwt = true)
-// Receives video_path (already in Storage), runs Gemini, inserts the completed row.
-// The analyses table has ONLY: id, user_id, plan, tema, duracao, form_data, created_at
+// Quota gate:
+//   free    → 1/day  (resets at midnight UTC)
+//   starter → 5/day  (resets at midnight UTC) + must have active subscription ≤ 30 days
+//   pro     → unlimited + must have active subscription ≤ 30 days
+//   elite   → unlimited + must have active subscription ≤ 30 days
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { SYSTEM_RUBRIC, buildUserPrompt } from '../_shared/rubric.ts';
-import * as gemini from '../_shared/gemini.ts';
+import { buildPromptForPlan, SYSTEM_RUBRIC } from '../_shared/rubric.ts';
+import { analyzeVideo } from '../_shared/gemini.ts';
 import { extractJson, isUsable, normalize } from '../_shared/schema.ts';
 import { gateResult } from '../_shared/gating.ts';
 import type { PlanTier } from '../_shared/types.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const ANON        = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -31,56 +34,92 @@ Deno.serve(async (req) => {
 
     // ---- 2. Input ----------------------------------------------------------
     const body = await req.json();
-    const videoPath = body.video_path as string | undefined;
-    const sourceUrl = body.source_url as string | undefined;
-    const tema = (body.tema as string | undefined) ?? 'geral';
-    const duracao = (body.duracao as number | undefined) ?? 0;
-    const platform = (body.platform as string | undefined) ?? null;
+    const videoPath  = body.video_path  as string | undefined;
+    const sourceUrl  = body.source_url  as string | undefined;
+    const tema       = (body.tema       as string | undefined) ?? 'geral';
+    const duracao    = (body.duracao    as number | undefined) ?? 0;
+    const platform   = (body.platform   as string | undefined) ?? null;
 
     if (!videoPath && !sourceUrl) {
       return json({ ok: false, error: 'nothing_to_analyze' }, 400);
     }
 
-    // ---- 3. Get user plan from profiles ------------------------------------
+    // ---- 3. Read plan from profiles (source of truth) ----------------------
     const { data: profile } = await admin
       .from('profiles')
-      .select('plan')
+      .select('plan, last_analysis_at')
       .eq('id', userId)
       .single();
     const plan = ((profile?.plan as string) ?? 'free') as PlanTier;
 
-    // ---- 4. Quota gate (server-side, authoritative) -----------------------
-    if (plan !== 'pro' && plan !== 'elite') {
-      const now = new Date();
-      let cutoff: string;
-      let limit: number;
+    // ---- 4. For paid plans: check subscription validity (30-day window) ----
+    if (plan !== 'free') {
+      const { data: sub } = await admin
+        .from('subscriptions')
+        .select('subscription_end_date, daily_analyses_used, last_daily_reset')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (plan === 'free') {
-        const d = new Date(now);
-        d.setHours(0, 0, 0, 0);
-        cutoff = d.toISOString();
-        limit = 1;
-      } else {
-        // starter — 10 per month
-        const d = new Date(now);
-        d.setDate(1);
-        d.setHours(0, 0, 0, 0);
-        cutoff = d.toISOString();
-        limit = 10;
+      const endDate = sub?.subscription_end_date
+        ? new Date(sub.subscription_end_date as string)
+        : null;
+
+      if (!endDate || new Date() > endDate) {
+        // Expired — auto-downgrade plan in profiles so future requests also fail fast
+        await admin.from('profiles').update({ plan: 'free' }).eq('id', userId);
+        return json({
+          ok: false,
+          error: 'subscription_expired',
+          message: 'O teu plano expirou. Renova para continuar a analisar.',
+        }, 403);
       }
 
-      const { count } = await admin
-        .from('analyses')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .gte('created_at', cutoff);
+      // Starter: max 5 analyses per day
+      if (plan === 'starter') {
+        const todayStr = new Date().toDateString();
+        const lastResetStr = sub?.last_daily_reset
+          ? new Date(sub.last_daily_reset as string).toDateString()
+          : null;
+        const dailyUsed = (lastResetStr === todayStr)
+          ? ((sub?.daily_analyses_used as number) ?? 0)
+          : 0;
 
-      if ((count ?? 0) >= limit) {
-        return json({ ok: false, error: 'limit_reached', plan }, 429);
+        if (dailyUsed >= 5) {
+          const tomorrow = new Date();
+          tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+          tomorrow.setUTCHours(0, 0, 0, 0);
+          return json({
+            ok: false,
+            error: 'limit_starter_daily',
+            message: 'Atingiste o limite de 5 análises diárias do plano Starter.',
+            next_reset_at: tomorrow.toISOString(),
+          }, 429);
+        }
+      }
+      // pro / elite: no daily limit
+    }
+
+    // ---- 5. Free plan: 1 analysis per day (resets at midnight UTC) ---------
+    if (plan === 'free') {
+      const lastAt = profile?.last_analysis_at as string | null;
+      if (lastAt) {
+        const lastDate = new Date(lastAt);
+        // Reset at UTC midnight
+        const todayMidnightUTC = new Date();
+        todayMidnightUTC.setUTCHours(0, 0, 0, 0);
+        if (lastDate >= todayMidnightUTC) {
+          const tomorrow = new Date(todayMidnightUTC);
+          tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+          return json({
+            ok: false,
+            error: 'limit_free',
+            next_reset_at: tomorrow.toISOString(),
+          }, 429);
+        }
       }
     }
 
-    // ---- 5. Curated data for the tema ------------------------------------
+    // ---- 6. Curated data for the tema ------------------------------------
     const { data: audios } = await admin
       .from('trending_audios')
       .select('title, artist, url, niche')
@@ -99,83 +138,93 @@ Deno.serve(async (req) => {
       return (hit.length ? hit : list).slice(0, 8);
     };
 
-    // ---- 6. Pull video from Storage ----------------------------------------
-    let videoRef: gemini.FileRef | undefined;
+    // ---- 7. Get video stream from Storage ----------------------------------
+    if (!videoPath) return json({ ok: false, error: 'no_video_available' }, 400);
 
-    if (videoPath) {
-      const { data: vidBlob, error: dlErr } = await admin.storage.from('clips').download(videoPath);
-      if (dlErr || !vidBlob) throw new Error(`Falha ao descarregar vídeo do Storage: ${dlErr?.message}`);
-      videoRef = await gemini.uploadVideo(vidBlob, vidBlob.type || 'video/mp4');
+    const { data: signedData, error: signErr } = await admin.storage
+      .from('clips')
+      .createSignedUrl(videoPath, 300);
+    if (signErr || !signedData?.signedUrl) {
+      throw new Error(`Failed to get signed URL: ${signErr?.message}`);
     }
-    // Note: source_url (direct links) not supported — TikTok/Instagram block server fetches.
-    // Users must download the video first and upload the file.
 
-    if (!videoRef) return json({ ok: false, error: 'no_video_available' }, 400);
+    const vidFetch = await fetch(signedData.signedUrl);
+    if (!vidFetch.ok) throw new Error(`Failed to fetch video (${vidFetch.status})`);
 
-    // ---- 7. Run Gemini engine (with retry on 503 / high-demand) -------------
-    const prompt = buildUserPrompt({
+    const contentLength = parseInt(vidFetch.headers.get('Content-Length') ?? '0', 10);
+    const mimeType = vidFetch.headers.get('Content-Type') || 'video/mp4';
+    if (!vidFetch.body) throw new Error('Video response has no body stream');
+    const videoStream = vidFetch.body;
+
+    // ---- 8. Build plan-tiered prompt ---------------------------------------
+    const promptOpts = {
       platform,
       niche: tema,
       hasMetrics: false,
       curatedAudios: matchTema(audios),
       curatedResources: matchTema(resources),
-    });
+    };
+    const prompt = `${SYSTEM_RUBRIC}\n\n${buildPromptForPlan(plan, promptOpts)}`;
 
+    // ---- 9. Run Gemini (with retry on 503 / overload) ----------------------
     const isRetryable = (e: unknown): boolean => {
       const msg = String(e).toLowerCase();
       return msg.includes('503') || msg.includes('high demand') || msg.includes('overloaded') || msg.includes('service unavailable');
     };
 
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
     const MAX_RETRIES = 3;
-    const RETRY_DELAY_MS = 5000;
-
-    let result: ReturnType<typeof normalize> | undefined;
+    const RETRY_DELAY_MS = 10_000; // 10s — Gemini 503s need more breathing room
+    let raw: string | undefined;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const raw = await gemini.generateJson(SYSTEM_RUBRIC, { video: videoRef, metrics: undefined, prompt }, 0.4);
-        result = normalize(extractJson(raw), false);
-        if (!isUsable(result)) {
-          // Quality retry at higher temperature — not a 503, so no sleep needed
-          const raw2 = await gemini.generateJson(SYSTEM_RUBRIC, { video: videoRef, metrics: undefined, prompt }, 0.6);
-          result = normalize(extractJson(raw2), false);
+        let stream = videoStream;
+        let length = contentLength;
+        if (attempt > 1) {
+          const reFetch = await fetch(signedData.signedUrl);
+          if (!reFetch.ok || !reFetch.body) throw new Error('Re-fetch for retry failed');
+          stream = reFetch.body;
+          length = parseInt(reFetch.headers.get('Content-Length') ?? '0', 10) || contentLength;
         }
-        break; // success — exit retry loop
+        raw = await analyzeVideo(stream, mimeType, length, prompt);
+        break;
       } catch (e) {
         lastError = e;
         console.warn(`Gemini attempt ${attempt}/${MAX_RETRIES} failed:`, String(e).slice(0, 200));
         if (!isRetryable(e) || attempt === MAX_RETRIES) break;
-        await sleep(RETRY_DELAY_MS);
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
       }
     }
 
-    if (!result || !isUsable(result)) {
-      if (videoRef) await gemini.deleteFile(videoRef.name).catch(() => {});
+    if (!raw) {
       if (isRetryable(lastError)) {
         return json({
           ok: false,
           error: 'gemini_overloaded',
-          message: 'A IA está com muita procura agora. O teu clip foi guardado e a análise será feita automaticamente em breve. Não perdes a tua análise.',
+          message: 'A IA está com muita procura agora. O teu clip foi guardado e a análise será feita automaticamente em breve.',
         }, 503);
       }
-      throw lastError ?? new Error('Gemini returned unusable result');
+      throw lastError ?? new Error('Gemini returned no response');
     }
 
-    if (videoRef) await gemini.deleteFile(videoRef.name).catch(() => {});
+    // ---- 10. Parse + quality check -----------------------------------------
+    let result = normalize(extractJson(raw), false);
+    if (!isUsable(result)) {
+      try {
+        const reFetch2 = await fetch(signedData.signedUrl);
+        if (reFetch2.ok && reFetch2.body) {
+          const len2 = parseInt(reFetch2.headers.get('Content-Length') ?? '0', 10) || contentLength;
+          const raw2 = await analyzeVideo(reFetch2.body, mimeType, len2, prompt);
+          result = normalize(extractJson(raw2), false);
+        }
+      } catch { /* use first result */ }
+    }
 
-    // ---- 8. Gate by plan, build form_data, insert row ----------------------
+    // ---- 11. Gate result by plan + insert row ------------------------------
     const gated = gateResult(result, plan);
-
     const analysisId = crypto.randomUUID();
-    const formData = {
-      ai_result: gated,
-      video_path: videoPath ?? null,
-      source_url: sourceUrl ?? null,
-      platform,
-    };
+    const now = new Date();
 
     const { error: insErr } = await admin.from('analyses').insert({
       id: analysisId,
@@ -183,13 +232,47 @@ Deno.serve(async (req) => {
       plan,
       tema,
       duracao,
-      form_data: formData,
+      form_data: {
+        ai_result: gated,
+        video_path: videoPath ?? null,
+        source_url: sourceUrl ?? null,
+        platform,
+      },
     });
 
     if (insErr) {
       console.error('analyses insert error', insErr);
-      // Return the result even if we couldn't persist — client still gets the analysis
       return json({ ok: true, analysis_id: null, result: gated, warning: 'persist_failed' });
+    }
+
+    // ---- 12. Update tracking counters --------------------------------------
+    // Always update profiles.last_analysis_at
+    await admin
+      .from('profiles')
+      .update({ last_analysis_at: now.toISOString() })
+      .eq('id', userId);
+
+    // Starter: increment daily_analyses_used in subscriptions
+    if (plan === 'starter') {
+      const todayStr = now.toDateString();
+      const { data: sub } = await admin
+        .from('subscriptions')
+        .select('daily_analyses_used, last_daily_reset')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const lastResetStr = sub?.last_daily_reset
+        ? new Date(sub.last_daily_reset as string).toDateString()
+        : null;
+      const prevCount = (lastResetStr === todayStr) ? ((sub?.daily_analyses_used as number) ?? 0) : 0;
+
+      await admin
+        .from('subscriptions')
+        .update({
+          daily_analyses_used: prevCount + 1,
+          last_daily_reset: now.toISOString(),
+        })
+        .eq('user_id', userId);
     }
 
     return json({ ok: true, analysis_id: analysisId, result: gated });
