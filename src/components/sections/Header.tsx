@@ -165,6 +165,93 @@ function UserDropdown({
   );
 }
 
+/* ── Mobile drawer ───────────────────────────────────────────────── */
+function MobileDrawer({
+  open: isOpen,
+  onClose,
+  onAnalyze,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onAnalyze: () => void;
+}) {
+  const { t } = useI18n();
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    // Prevent body scroll while open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const links = [
+    { href: '#como',    label: t.nav.howItWorks },
+    { href: '#analise', label: t.nav.whatAnalyzed },
+    { href: '#planos',  label: t.nav.plans },
+    { href: '#faq',     label: t.nav.faq },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col md:hidden">
+      {/* backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+
+      {/* panel — slides in from right */}
+      <div className="absolute inset-y-0 right-0 flex w-[80vw] max-w-xs flex-col bg-bg border-l border-border shadow-2xl">
+        {/* header row */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+          <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted">Menu</span>
+          <button
+            onClick={onClose}
+            aria-label="Fechar menu"
+            className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-muted hover:text-text hover:border-gold/40 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="1" y1="1" x2="13" y2="13" /><line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          </button>
+        </div>
+
+        {/* nav links */}
+        <nav className="flex flex-col gap-1 px-4 py-6 flex-1">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={onClose}
+              className="rounded-xzk px-4 py-3.5 text-base font-semibold text-text hover:bg-surface/60 hover:text-gold-hi transition-colors"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* language selector + CTA at bottom */}
+        <div className="px-4 pb-8 flex flex-col gap-3 border-t border-border pt-5">
+          <div className="flex justify-center">
+            <LangSelector />
+          </div>
+          <button
+            type="button"
+            onClick={() => { onClose(); onAnalyze(); }}
+            className="btn-gold gold-glow w-full rounded-xzk px-6 py-3.5 text-sm font-semibold"
+          >
+            {t.nav.analyzeClip}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Header ──────────────────────────────────────────────────────── */
 export function Header() {
   const { open } = useAnalyzer();
@@ -173,6 +260,7 @@ export function Header() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [signOutModal, setSignOutModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -225,7 +313,7 @@ export function Header() {
             <BrandMark size={36} withWordmark />
           </a>
 
-          {/* Nav links (desktop) */}
+          {/* Nav links (desktop only) */}
           <div className="hidden items-center gap-8 text-sm font-semibold text-muted md:flex">
             <a href="#como" className="transition-colors hover:text-gold-hi">{t.nav.howItWorks}</a>
             <a href="#analise" className="transition-colors hover:text-gold-hi">{t.nav.whatAnalyzed}</a>
@@ -234,20 +322,24 @@ export function Header() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
-            <LangSelector />
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Lang selector — desktop only (mobile has it inside drawer) */}
+            <div className="hidden sm:block">
+              <LangSelector />
+            </div>
+
             {session ? (
               <>
                 <button
                   type="button"
                   onClick={() => open()}
-                  className="btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
+                  className="hidden sm:inline-flex btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
                 >
                   {t.nav.analyzeClip}
                 </button>
 
-                {/* User icon → dropdown */}
-                <div className="relative" ref={dropdownRef}>
+                {/* User icon → dropdown (desktop) */}
+                <div className="hidden sm:block relative" ref={dropdownRef}>
                   <button
                     type="button"
                     onClick={() => setDropdownOpen((v) => !v)}
@@ -263,7 +355,6 @@ export function Header() {
                       <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
                     </svg>
                   </button>
-
                   {dropdownOpen && (
                     <UserDropdown
                       onClose={() => setDropdownOpen(false)}
@@ -276,14 +367,32 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => open()}
-                className="btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
+                className="hidden sm:inline-flex btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
               >
                 {t.nav.analyzeClip}
               </button>
             )}
+
+            {/* Hamburger — mobile only */}
+            <button
+              type="button"
+              aria-label="Abrir menu"
+              onClick={() => setMobileOpen(true)}
+              className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-[5px] rounded-xzk border border-border bg-surface/60 hover:border-gold/40 transition-colors"
+            >
+              <span className="block w-5 h-[1.5px] bg-text rounded-full" />
+              <span className="block w-5 h-[1.5px] bg-text rounded-full" />
+              <span className="block w-3.5 h-[1.5px] bg-text rounded-full self-start ml-[5px]" />
+            </button>
           </div>
         </nav>
       </header>
+
+      <MobileDrawer
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        onAnalyze={() => open()}
+      />
 
       {signOutModal && (
         <SignOutModal

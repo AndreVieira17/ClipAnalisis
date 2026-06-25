@@ -123,7 +123,7 @@ export function UploadForm({ onSubmit }: { onSubmit: (input: AnalyzeInput) => vo
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 p-10 text-center">
+          <div className="flex flex-col items-center gap-3 p-6 sm:p-10 text-center">
             <div className="w-12 h-12 rounded-xzk bg-bg flex items-center justify-center text-muted">
               <Upload size={22} />
             </div>

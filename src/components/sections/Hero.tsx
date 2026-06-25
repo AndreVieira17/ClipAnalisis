@@ -31,7 +31,7 @@ export function Hero() {
           </motion.span>
 
           <motion.h1
-            className="mt-5 text-[clamp(2.6rem,8vw,5.6rem)] leading-[0.92]"
+            className="mt-5 text-[clamp(1.8rem,8vw,5.6rem)] leading-[0.92]"
             style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}
             variants={charRevealParent}
             initial="hidden"
