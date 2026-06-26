@@ -101,26 +101,13 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
 
 
   return (
-    <div
-      style={{
-        borderRadius: '16px',
-        height: '100%',
-        ...cardStyle,
-        transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease',
-        cursor: 'default',
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLDivElement).style.transform = pro ? 'scale(1.065)' : 'scale(1.035)';
-        (e.currentTarget as HTMLDivElement).style.boxShadow = pro
-          ? '0 0 70px rgba(212,175,55,0.4), 0 20px 60px rgba(0,0,0,0.6)'
-          : '0 0 50px rgba(212,175,55,0.25), 0 20px 60px rgba(0,0,0,0.5)';
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLDivElement).style.transform = pro ? 'scale(1.03)' : 'scale(1)';
-        (e.currentTarget as HTMLDivElement).style.boxShadow = pro
-          ? '0 0 60px rgba(212,175,55,0.3), 0 8px 40px rgba(0,0,0,0.6)'
-          : 'none';
-      }}
+    <motion.div
+      style={{ borderRadius: '16px', height: '100%', ...cardStyle }}
+      whileHover={pro
+        ? { scale: 1.055, boxShadow: '0 0 60px rgba(212,175,55,0.35), 0 20px 60px rgba(0,0,0,0.5)' }
+        : { scale: 1.03, boxShadow: '0 0 40px rgba(212,175,55,0.2), 0 20px 60px rgba(0,0,0,0.4)' }
+      }
+      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
     <PopCard
       intensity={pro ? 'strong' : 'soft'}
@@ -190,7 +177,7 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
         )}
       </button>
     </PopCard>
-    </div>
+    </motion.div>
   );
 }
 

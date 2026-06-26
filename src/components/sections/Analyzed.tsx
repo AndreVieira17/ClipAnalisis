@@ -39,20 +39,14 @@ export function Analyzed() {
 
         <div className="mt-12 grid grid-cols-2 gap-8 border-y border-border py-8 sm:grid-cols-4">
           {STAT_VALUES.map((sv, i) => (
-            <motion.div
+            <Stat
               key={i}
-              whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              style={{ borderRadius: '8px' }}
-            >
-              <Stat
-                value={sv.value}
-                prefix={sv.prefix}
-                suffix={sv.suffix}
-                decimals={sv.decimals}
-                label={t.analyzed.stats[i]?.label ?? ''}
-              />
-            </motion.div>
+              value={sv.value}
+              prefix={sv.prefix}
+              suffix={sv.suffix}
+              decimals={sv.decimals}
+              label={t.analyzed.stats[i]?.label ?? ''}
+            />
           ))}
         </div>
 
@@ -62,15 +56,9 @@ export function Analyzed() {
           whileInView="show"
           viewport={{ once: true, margin: '-8%' }}
           className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          style={{ overflow: 'visible' }}
         >
           {t.analyzed.cards.map((a) => (
-            <motion.div
-              key={a.tag}
-              variants={staggerChild}
-              whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
+            <motion.div key={a.tag} variants={staggerChild}>
               <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-6 transition-colors hover:border-gold/40">
                 <span className="chip rounded px-2 py-0.5">{a.tag}</span>
                 <h3 className="mt-4 text-xl">{a.title}</h3>

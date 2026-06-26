@@ -28,15 +28,9 @@ export function Social() {
           whileInView="show"
           viewport={{ once: true, margin: '-8%' }}
           className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3"
-          style={{ overflow: 'visible' }}
         >
           {t.social.testimonials.map((s) => (
-            <motion.div
-              key={s.author}
-              variants={staggerChild}
-              whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
+            <motion.div key={s.author} variants={staggerChild}>
               <PopCard className="flex h-full flex-col rounded-xzk border border-border bg-surface/60 p-7">
                 <p className="flex-1 text-lg leading-snug text-text">{'"'}{s.quote}{'"'}</p>
                 <div className="mt-6 flex items-center gap-3">
