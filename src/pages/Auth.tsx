@@ -62,9 +62,9 @@ export default function Auth() {
       return;
     }
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/auth/reset',
+      redirectTo: 'https://clipanalisis.com',
     });
-    setMessage({ text: 'Email de redefinição enviado! Verifica a tua caixa de correio.', type: 'success' });
+    setMessage({ text: 'Email de redefinição enviado! Verifica a tua caixa de entrada.', type: 'success' });
   }
 
   const inputClass =
@@ -115,7 +115,7 @@ export default function Auth() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-app-text-muted hover:text-app-text-primary transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -125,7 +125,7 @@ export default function Auth() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-xs text-app-text-muted hover:text-app-accent transition-colors"
+                className="text-xs text-[#D4AF37] hover:text-[#f0d060] transition-colors"
               >
                 Esqueceste a senha?
               </button>
