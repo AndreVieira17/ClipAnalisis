@@ -98,34 +98,40 @@ export default function Auth() {
           <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-1.5">
             Password
           </label>
-          <div className="relative w-full">
+          <div style={{ position: 'relative', width: '100%' }}>
             <input
-              id="password"
               type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="senha (mín. 6)"
               required
               minLength={6}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
+              style={{
+                width: '100%',
+                background: '#18181b',
+                border: '1px solid #3f3f46',
+                borderRadius: '8px',
+                padding: '12px 48px 12px 16px',
+                color: '#ffffff',
+                fontSize: '16px',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
             />
             <button
               type="button"
-              onClick={() => setShowPassword((v) => !v)}
+              onClick={() => setShowPassword(v => !v)}
               style={{
                 position: 'absolute',
-                right: '12px',
+                right: '14px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                zIndex: 20,
-                padding: '4px',
+                padding: '0',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 color: '#ffffff',
               }}
             >
