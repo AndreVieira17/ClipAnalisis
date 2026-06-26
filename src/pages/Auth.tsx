@@ -113,21 +113,23 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
               style={{
                 position: 'absolute',
                 right: '12px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#a1a1aa',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                zIndex: 10,
-                padding: 0,
+                zIndex: 20,
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
               }}
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <EyeOff size={20} color="#ffffff" /> : <Eye size={20} color="#ffffff" />}
             </button>
           </div>
         </div>
