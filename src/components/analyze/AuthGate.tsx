@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-type ForgotStep = 'hidden' | 'email' | 'code';
+type ForgotStep = 'hidden' | 'code';
 
 export function AuthGate() {
   const [mode, setMode] = useState<'in' | 'up'>('up');
@@ -13,7 +13,6 @@ export function AuthGate() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const [forgotStep, setForgotStep] = useState<ForgotStep>('hidden');
-  const [otpEmail, setOtpEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
 
   const submit = async (e: React.FormEvent) => {
@@ -37,14 +36,14 @@ export function AuthGate() {
     }
   };
 
-  const handleSendOtp = async () => {
-    if (!otpEmail) { setMsg('Introduz o teu email primeiro.'); return; }
+  const handleForgotPassword = async () => {
+    if (!email) { setMsg('Introduz o teu email primeiro.'); return; }
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.auth.signInWithOtp({ email: otpEmail, options: { shouldCreateUser: false } });
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
     setBusy(false);
     if (error) { setMsg(error.message); return; }
-    setMsg(null);
+    setOtpCode('');
     setForgotStep('code');
   };
 
@@ -52,10 +51,9 @@ export function AuthGate() {
     if (!otpCode) { setMsg('Introduz o código recebido.'); return; }
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.auth.verifyOtp({ email: otpEmail, token: otpCode, type: 'email' });
+    const { error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' });
     setBusy(false);
     if (error) { setMsg('Código inválido ou expirado.'); return; }
-    // success — supabase session is now set, modal will close automatically
     setForgotStep('hidden');
   };
 
@@ -69,19 +67,6 @@ export function AuthGate() {
     fontSize: '15px',
     outline: 'none',
     boxSizing: 'border-box',
-  };
-
-  const btnGoldInline: React.CSSProperties = {
-    width: '100%',
-    background: '#D4AF37',
-    color: '#000000',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '11px',
-    fontSize: '13px',
-    fontWeight: '800',
-    cursor: 'pointer',
-    letterSpacing: '1px',
   };
 
   return (
@@ -103,7 +88,6 @@ export function AuthGate() {
           className="w-full rounded-xzk border border-border bg-bg px-4 py-3 text-text outline-none focus:border-gold/50"
         />
 
-        {/* Password with eye toggle */}
         <div style={{ position: 'relative', width: '100%' }}>
           <input
             type={showPassword ? 'text' : 'password'}
@@ -139,48 +123,22 @@ export function AuthGate() {
         {mode === 'up' ? 'Já tenho conta — entrar' : 'Criar conta nova'}
       </button>
 
-      {/* Forgot password — OTP flow */}
       {forgotStep === 'hidden' && (
         <button
           type="button"
-          onClick={() => { setForgotStep('email'); setOtpEmail(''); setMsg(null); }}
+          onClick={handleForgotPassword}
+          disabled={busy}
           className="mt-2 w-full text-center text-sm"
           style={{ color: '#D4AF37', background: 'none', border: 'none', cursor: 'pointer' }}
         >
-          Esqueceste a senha?
+          {busy ? '...' : 'Esqueceste a senha?'}
         </button>
-      )}
-
-      {forgotStep === 'email' && (
-        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <p style={{ color: '#888888', fontSize: '13px', textAlign: 'center', margin: '0 0 4px' }}>
-            Envia um código de 6 dígitos para o teu email.
-          </p>
-          <input
-            type="email"
-            placeholder="teu@email.com"
-            value={otpEmail}
-            onChange={e => setOtpEmail(e.target.value)}
-            style={inputInline}
-          />
-          {msg && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{msg}</p>}
-          <button onClick={handleSendOtp} disabled={busy} style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}>
-            {busy ? '...' : 'ENVIAR CÓDIGO'}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setForgotStep('hidden'); setMsg(null); }}
-            style={{ background: 'none', border: 'none', color: '#666', fontSize: '12px', cursor: 'pointer', textAlign: 'center' }}
-          >
-            Cancelar
-          </button>
-        </div>
       )}
 
       {forgotStep === 'code' && (
         <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <p style={{ color: '#888888', fontSize: '13px', textAlign: 'center', margin: '0 0 4px' }}>
-            Código enviado para <strong style={{ color: '#D4AF37' }}>{otpEmail}</strong>
+            Código enviado para <strong style={{ color: '#D4AF37' }}>{email}</strong>
           </p>
           <input
             type="text"
@@ -192,15 +150,27 @@ export function AuthGate() {
             style={{ ...inputInline, textAlign: 'center', fontSize: '22px', letterSpacing: '8px' }}
           />
           {msg && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{msg}</p>}
-          <button onClick={handleVerifyOtp} disabled={busy} style={btnGoldInline}>
+          <button
+            onClick={handleVerifyOtp}
+            disabled={busy}
+            style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}
+          >
             {busy ? '...' : 'VERIFICAR CÓDIGO'}
           </button>
           <button
             type="button"
-            onClick={() => setForgotStep('email')}
+            onClick={handleForgotPassword}
+            disabled={busy}
             style={{ background: 'none', border: 'none', color: '#666', fontSize: '12px', cursor: 'pointer', textAlign: 'center' }}
           >
             Reenviar código
+          </button>
+          <button
+            type="button"
+            onClick={() => { setForgotStep('hidden'); setMsg(null); setOtpCode(''); }}
+            style={{ background: 'none', border: 'none', color: '#555', fontSize: '12px', cursor: 'pointer', textAlign: 'center' }}
+          >
+            Cancelar
           </button>
         </div>
       )}
