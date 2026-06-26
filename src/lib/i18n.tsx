@@ -130,7 +130,7 @@ const pt: Translations = {
     cards: [
       { tag: 'GANCHO', title: 'OS 3 PRIMEIROS SEGUNDOS', body: 'Se não dá soco no primeiro segundo, o resto não importa. A gente mede onde o dedo quer rolar.' },
       { tag: 'RITMO', title: 'CADÊNCIA DE CORTE', body: 'Corte lento mata clip. Mapeamos o ritmo ideal pro teu formato e onde ele afrouxa.' },
-      { tag: 'RETENÇÃO', title: 'CURVA DE ABANDONO', body: 'Cruzamos teu print com a edição pra achar o frame exato em que o povo some.' },
+      { tag: 'RETENÇÃO', title: 'CURVA DE ABANDONO', body: 'Analisamos a edição frame a frame pra achar o momento exato em que o povo some.' },
       { tag: 'ÁUDIO', title: 'PUNCH & MIXAGEM', body: 'Áudio estourado ou mole derruba alcance. Checamos punch, clareza e o drop certo.' },
       { tag: 'LEGENDA', title: 'TIMING DA LEGENDA', body: 'Palavra a palavra, no tempo certo, com a keyword no ouro. Legenda é metade do clip.' },
       { tag: 'CTA', title: 'GANCHO DE LOOP', body: 'O corte que liga o fim no começo e segura o replay. É o que multiplica view.' },
@@ -156,7 +156,7 @@ const pt: Translations = {
   faq: {
     chip: 'DÚVIDAS', title: 'FAQ',
     items: [
-      { q: 'O QUE PRECISO DE ENVIAR?', a: 'Faz upload do teu clip directamente na plataforma — não precisas de nenhum print ou screenshot. A IA analisa o vídeo frame a frame e devolve o raio-X completo.' },
+      { q: 'O QUE PRECISO DE ENVIAR?', a: 'Faz upload do teu clip directamente na plataforma — não precisas de nada além do vídeo. A IA analisa tudo frame a frame e devolve o raio-X completo.' },
       { q: 'FUNCIONA PRA QUALQUER NICHO?', a: 'Sim. Humor, gameplay, reação, podcast, lifestyle. A IA calibra o ritmo ideal pro teu formato.' },
       { q: 'É SÓ CLIP DE STREAM?', a: 'Não. Qualquer vídeo curto vertical — Reels, Shorts, TikTok. O mecanismo é o mesmo: o que prende e o que mata.' },
       { q: 'MEUS VÍDEOS FICAM GUARDADOS?', a: 'Só o tempo da análise. Você controla e pode apagar quando quiser. Nada vira conteúdo de terceiros.' },
@@ -278,7 +278,7 @@ const en: Translations = {
   faq: {
     chip: 'QUESTIONS', title: 'FAQ',
     items: [
-      { q: 'WHAT DO I NEED TO SEND?', a: 'Just upload your clip directly on the platform — no screenshot or print needed. The AI analyzes the video frame by frame and returns the full X-ray.' },
+      { q: 'WHAT DO I NEED TO SEND?', a: 'Just upload your clip directly on the platform — nothing else needed. The AI analyzes everything frame by frame and returns the full X-ray.' },
       { q: 'DOES IT WORK FOR ANY NICHE?', a: 'Yes. Humor, gameplay, reaction, podcast, lifestyle. The AI calibrates the ideal rhythm for your format.' },
       { q: 'IS IT ONLY FOR STREAM CLIPS?', a: 'No. Any short vertical video — Reels, Shorts, TikTok. The mechanism is the same: what hooks and what kills.' },
       { q: 'ARE MY VIDEOS STORED?', a: "Only during the analysis. You control it and can delete whenever you want. Nothing becomes third-party content." },
