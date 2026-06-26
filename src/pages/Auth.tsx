@@ -3,6 +3,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
+type ForgotStep = 'hidden' | 'email' | 'code';
+
 export default function Auth() {
   const [mode, setMode] = useState<'login' | 'signup'>('signup');
   const [email, setEmail] = useState('');
@@ -11,6 +13,10 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+
+  const [forgotStep, setForgotStep] = useState<ForgotStep>('hidden');
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -28,10 +34,49 @@ export default function Auth() {
     setLoading(false);
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) { setMessage('Introduz o teu email primeiro'); return; }
-    await supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://clipanalisis.com/reset-password' });
-    setMessage('Email de redefinição enviado! Verifica a tua caixa de entrada.');
+  const handleSendOtp = async () => {
+    if (!otpEmail) { setMessage('Introduz o teu email primeiro.'); return; }
+    setLoading(true);
+    setMessage('');
+    const { error } = await supabase.auth.signInWithOtp({ email: otpEmail });
+    setLoading(false);
+    if (error) { setMessage(error.message); return; }
+    setForgotStep('code');
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode) { setMessage('Introduz o código recebido.'); return; }
+    setLoading(true);
+    setMessage('');
+    const { error } = await supabase.auth.verifyOtp({ email: otpEmail, token: otpCode, type: 'email' });
+    setLoading(false);
+    if (error) { setMessage('Código inválido ou expirado.'); return; }
+    navigate('/');
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: '#1a1a1a',
+    border: '1px solid #333333',
+    borderRadius: '8px',
+    padding: '14px 16px',
+    color: '#ffffff',
+    fontSize: '15px',
+    boxSizing: 'border-box',
+    outline: 'none',
+  };
+
+  const btnGoldStyle: React.CSSProperties = {
+    width: '100%',
+    background: '#D4AF37',
+    color: '#000000',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '14px',
+    fontSize: '15px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    letterSpacing: '1px',
   };
 
   return (
@@ -50,7 +95,7 @@ export default function Auth() {
           placeholder="teu@email.com"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333333', borderRadius: '8px', padding: '14px 16px', color: '#ffffff', fontSize: '15px', marginBottom: '12px', boxSizing: 'border-box', outline: 'none' }}
+          style={{ ...inputStyle, marginBottom: '12px' }}
         />
 
         <div style={{ position: 'relative', width: '100%', marginBottom: '16px' }}>
@@ -59,49 +104,100 @@ export default function Auth() {
             placeholder="senha (mín. 6)"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333333', borderRadius: '8px', padding: '14px 48px 14px 16px', color: '#ffffff', fontSize: '15px', boxSizing: 'border-box', outline: 'none' }}
+            style={{ ...inputStyle, padding: '14px 48px 14px 16px' }}
           />
           <button
             type="button"
             onClick={() => setShowPassword(v => !v)}
             style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '0', lineHeight: '0' }}
           >
-            {showPassword
-              ? <EyeOff size={20} color="#aaaaaa" />
-              : <Eye size={20} color="#aaaaaa" />
-            }
+            {showPassword ? <EyeOff size={20} color="#aaaaaa" /> : <Eye size={20} color="#aaaaaa" />}
           </button>
         </div>
 
-        {message && (
-          <p style={{ color: message.includes('enviado') ? '#D4AF37' : '#ef4444', fontSize: '13px', marginBottom: '12px', textAlign: 'center' }}>
+        {message && forgotStep === 'hidden' && (
+          <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px', textAlign: 'center' }}>
             {message}
           </p>
         )}
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px', marginBottom: '16px' }}
-        >
+        <button onClick={handleSubmit} disabled={loading} style={{ ...btnGoldStyle, marginBottom: '16px', opacity: loading ? 0.6 : 1 }}>
           {loading ? '...' : mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA'}
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: '14px', marginBottom: '12px' }}>
+        <p style={{ textAlign: 'center', fontSize: '14px', marginBottom: '8px' }}>
           <span
-            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); setShowPassword(false); }}
+            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(''); setShowPassword(false); setForgotStep('hidden'); }}
             style={{ color: '#D4AF37', cursor: 'pointer' }}
           >
             {mode === 'login' ? 'Criar conta nova' : 'Já tenho conta — entrar'}
           </span>
         </p>
 
-        {mode === 'login' && (
+        {/* Forgot password — OTP flow */}
+        {forgotStep === 'hidden' && (
           <p style={{ textAlign: 'center', fontSize: '13px' }}>
-            <span onClick={handleForgotPassword} style={{ color: '#D4AF37', cursor: 'pointer' }}>
+            <span
+              onClick={() => { setForgotStep('email'); setOtpEmail(email); setMessage(''); }}
+              style={{ color: '#D4AF37', cursor: 'pointer' }}
+            >
               Esqueceste a senha?
             </span>
           </p>
+        )}
+
+        {forgotStep === 'email' && (
+          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ color: '#888888', fontSize: '13px', textAlign: 'center', margin: '0 0 4px' }}>
+              Envia um código de 6 dígitos para o teu email.
+            </p>
+            <input
+              type="email"
+              placeholder="teu@email.com"
+              value={otpEmail}
+              onChange={e => setOtpEmail(e.target.value)}
+              style={inputStyle}
+            />
+            {message && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{message}</p>}
+            <button onClick={handleSendOtp} disabled={loading} style={{ ...btnGoldStyle, opacity: loading ? 0.6 : 1 }}>
+              {loading ? '...' : 'ENVIAR CÓDIGO'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setForgotStep('hidden'); setMessage(''); }}
+              style={{ background: 'none', border: 'none', color: '#666', fontSize: '12px', cursor: 'pointer', textAlign: 'center' }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
+        {forgotStep === 'code' && (
+          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ color: '#888888', fontSize: '13px', textAlign: 'center', margin: '0 0 4px' }}>
+              Código enviado para <strong style={{ color: '#D4AF37' }}>{otpEmail}</strong>
+            </p>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Código de 6 dígitos"
+              value={otpCode}
+              onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              maxLength={6}
+              style={{ ...inputStyle, textAlign: 'center', fontSize: '22px', letterSpacing: '8px' }}
+            />
+            {message && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{message}</p>}
+            <button onClick={handleVerifyOtp} disabled={loading} style={{ ...btnGoldStyle, opacity: loading ? 0.6 : 1 }}>
+              {loading ? '...' : 'VERIFICAR CÓDIGO'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setForgotStep('email')}
+              style={{ background: 'none', border: 'none', color: '#666', fontSize: '12px', cursor: 'pointer', textAlign: 'center' }}
+            >
+              Reenviar código
+            </button>
+          </div>
         )}
       </div>
     </div>
