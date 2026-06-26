@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAnalyzer } from './AnalyzerContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,27 +10,6 @@ import { UploadForm, type AnalyzeInput } from './UploadForm';
 import { ResultView } from './ResultView';
 
 type Step = 'checking' | 'upload' | 'uploading' | 'processing' | 'result' | 'limit' | 'expired' | 'error';
-
-/** Countdown hook — ticks every second, returns "HH:MM:SS" or null when done */
-function useCountdown(target: Date | null): string | null {
-  const calc = useCallback(() => {
-    if (!target) return null;
-    const diff = Math.max(0, Math.floor((target.getTime() - Date.now()) / 1000));
-    if (diff === 0) return null;
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  }, [target]);
-
-  const [display, setDisplay] = useState<string | null>(calc);
-  useEffect(() => {
-    setDisplay(calc());
-    const id = setInterval(() => setDisplay(calc()), 1000);
-    return () => clearInterval(id);
-  }, [calc]);
-  return display;
-}
 
 function Processing({ step }: { step: 'uploading' | 'processing' }) {
   return (
@@ -53,50 +32,32 @@ function Processing({ step }: { step: 'uploading' | 'processing' }) {
   );
 }
 
-/** Free plan — daily limit countdown */
 function scrollToPlanos() {
   document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-function FreeLimitBanner({ nextResetAt, onClose }: { nextResetAt: Date; onClose: () => void }) {
-  const countdown = useCountdown(nextResetAt);
+function FreeLimitBanner({ onClose }: { onClose: () => void }) {
   return (
-    <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-gold/5 p-6 text-center relative">
+    <div style={{ textAlign: 'center', padding: '32px 24px', background: '#111111', borderRadius: '12px', border: '1px solid #222222' }}>
+      <p style={{ fontSize: '32px', marginBottom: '8px' }}>🎬</p>
+      <h3 style={{ color: '#ffffff', fontSize: '18px', fontWeight: '800', marginBottom: '8px' }}>
+        Já usaste a tua análise grátis
+      </h3>
+      <p style={{ color: '#aaaaaa', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>
+        Para continuares a analisar os teus clips e descobrires o que os faz viralizar, escolhe um plano.
+      </p>
       <button
-        onClick={onClose}
-        aria-label="Fechar"
-        className="absolute top-3 right-3 w-7 h-7 rounded-full border border-border bg-surface/60 flex items-center justify-center text-muted hover:text-gold-hi hover:border-gold/40 transition-colors text-xs"
+        onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }}
+        style={{ background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '14px', fontWeight: '900', cursor: 'pointer', letterSpacing: '1px' }}
       >
-        ✕
+        VER PLANOS
       </button>
-      <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-gold mb-3">
-        LIMITE DIÁRIO ATINGIDO
-      </p>
-      <p className="text-sm text-muted mb-4">
-        Já usaste a tua análise gratuita hoje. Próxima análise disponível em:
-      </p>
-      {countdown ? (
-        <div className="font-mono text-4xl font-bold text-gold tabular-nums mb-6">
-          {countdown}
-        </div>
-      ) : (
-        <p className="font-mono text-gold text-lg mb-6">Disponível agora!</p>
-      )}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button onClick={onClose} className="btn-ghost rounded-xzk px-5 py-2.5 text-sm font-semibold order-2 sm:order-1">
-          ← Voltar
-        </button>
-        <button onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }} className="btn-gold rounded-xzk px-6 py-2.5 text-sm order-1 sm:order-2">
-          VER PLANOS — ANALISAR SEM LIMITES
-        </button>
-      </div>
     </div>
   );
 }
 
 /** Starter plan — daily limit (5/day) */
 function StarterLimitBanner({ nextResetAt, onClose }: { nextResetAt: Date | null; onClose: () => void }) {
-  const countdown = useCountdown(nextResetAt);
   return (
     <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-gold/5 p-6 text-center relative">
       <button
@@ -112,10 +73,10 @@ function StarterLimitBanner({ nextResetAt, onClose }: { nextResetAt: Date | null
       <p className="text-sm text-muted mb-4">
         Atingiste as 5 análises de hoje. Volta amanhã ou faz upgrade para Pro para análises ilimitadas.
       </p>
-      {countdown && (
-        <div className="font-mono text-3xl font-bold text-gold tabular-nums mb-4">
-          {countdown}
-        </div>
+      {nextResetAt && (
+        <p className="font-mono text-gold text-sm mb-4">
+          Reset às {nextResetAt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+        </p>
       )}
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button onClick={onClose} className="btn-ghost rounded-xzk px-5 py-2.5 text-sm font-semibold order-2 sm:order-1">
@@ -310,10 +271,7 @@ export default function AnalyzerModal() {
                   <ResultView result={result} />
                   {plan === 'free' ? (
                     <div className="mt-10">
-                      <FreeLimitBanner
-                        nextResetAt={(() => { const t = new Date(); t.setUTCDate(t.getUTCDate() + 1); t.setUTCHours(0, 0, 0, 0); return t; })()}
-                        onClose={close}
-                      />
+                      <FreeLimitBanner onClose={close} />
                     </div>
                   ) : (
                     <button
@@ -330,15 +288,7 @@ export default function AnalyzerModal() {
                 limitPlan === 'starter' ? (
                   <StarterLimitBanner nextResetAt={nextResetAt} onClose={close} />
                 ) : (
-                  nextResetAt ? (
-                    <FreeLimitBanner nextResetAt={nextResetAt} onClose={close} />
-                  ) : (
-                    <div className="mx-auto max-w-md rounded-xzk border border-gold/40 bg-surface/40 p-6 text-center">
-                      <h3 className="text-2xl">LIMITE ATINGIDO</h3>
-                      <p className="mt-3 text-sm text-muted">Atingiste o limite do plano. Faz upgrade para continuar.</p>
-                      <button onClick={() => { close(); setTimeout(scrollToPlanos, 150); }} className="btn-gold mt-5 rounded-xzk px-6 py-3">VER PLANOS</button>
-                    </div>
-                  )
+                  <FreeLimitBanner onClose={close} />
                 )
               ) : (
                 <div className="mx-auto max-w-md rounded-xzk border border-danger/40 bg-danger/5 p-6 text-center">
