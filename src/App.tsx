@@ -6,9 +6,10 @@ import { LanguageProvider } from '@/lib/i18n';
 
 import Landing from '@/pages/Landing';
 
-const Auth        = lazy(() => import('@/pages/Auth'));
-const Historico   = lazy(() => import('@/pages/Historico'));
-const AnaliseView = lazy(() => import('@/pages/AnaliseView'));
+const Auth          = lazy(() => import('@/pages/Auth'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const Historico     = lazy(() => import('@/pages/Historico'));
+const AnaliseView   = lazy(() => import('@/pages/AnaliseView'));
 
 function Spinner() {
   return (
@@ -40,6 +41,16 @@ export default function App() {
             element={
               <Suspense fallback={<Spinner />}>
                 <Auth />
+              </Suspense>
+            }
+          />
+
+          {/* ── Reset password ── */}
+          <Route
+            path="/reset-password"
+            element={
+              <Suspense fallback={<Spinner />}>
+                <ResetPassword />
               </Suspense>
             }
           />

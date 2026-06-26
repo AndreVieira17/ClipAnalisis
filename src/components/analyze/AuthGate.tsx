@@ -33,7 +33,7 @@ export function AuthGate() {
 
   const handleForgotPassword = async () => {
     if (!email) { setMsg('Introduz o teu email primeiro'); return; }
-    await supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://clipanalisis.com' });
+    await supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://clipanalisis.com/reset-password' });
     setMsg('Email de redefinição enviado! Verifica a tua caixa de entrada.');
   };
 
