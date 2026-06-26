@@ -236,17 +236,18 @@ function MobileDrawer({
 
         {/* language selector + CTA at bottom */}
         <div className="px-4 pb-8 flex flex-col gap-3 border-t border-border pt-5">
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
             {(['PT', 'EN', 'ES'] as const).map(l => (
               <button
                 key={l}
                 onClick={() => { setLanguage(l.toLowerCase() as Lang); onClose(); }}
                 style={{
+                  width: '100%',
                   background: lang === l.toLowerCase() ? '#D4AF37' : 'transparent',
                   color: lang === l.toLowerCase() ? '#000000' : '#ffffff',
                   border: '1px solid #333333',
                   borderRadius: '8px',
-                  padding: '8px 16px',
+                  padding: '10px 16px',
                   fontSize: '14px',
                   fontWeight: '700',
                   cursor: 'pointer',

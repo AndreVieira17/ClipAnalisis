@@ -4,6 +4,8 @@ import { useAnalyzer } from '@/components/analyze/AnalyzerContext';
 import { useI18n } from '@/lib/i18n';
 import { charRevealParent, charRevealChild, typewriterParent, typewriterChild } from '@/components/ui/motion-presets';
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
 export function Hero() {
   const { open } = useAnalyzer();
   const { t } = useI18n();
@@ -30,53 +32,66 @@ export function Hero() {
             {t.hero.chip}
           </motion.span>
 
-          <motion.h1
-            className="mt-5 text-[clamp(1.5rem,8vw,5.6rem)] leading-[0.92]"
-            style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}
-            variants={charRevealParent}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            {/* Line 1 — plain */}
-            <span className="block text-text">
-              {[...t.hero.line1].map((ch, i) => (
-                <motion.span key={`l1-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
-                  {ch === ' ' ? null : ch}
-                </motion.span>
-              ))}
-            </span>
-            {/* Line 2 — gold foil applied per-char (Foil not used to preserve stagger) */}
-            <span className="block num-glow">
-              {[...t.hero.line2].map((ch, i) => (
-                <motion.span key={`l2-${i}`} variants={charRevealChild} className={`inline-block gold-foil${ch === ' ' ? ' w-[0.3em]' : ''}`}>
-                  {ch === ' ' ? null : ch}
-                </motion.span>
-              ))}
-            </span>
-            {/* Line 3 — char-by-char, mobile break after 2nd word */}
-            <span className="block text-text">
-              {t.hero.line3.split(' ').map((word, wi, arr) => (
-                <span key={`l3w-${wi}`} className="inline">
-                  {[...word].map((ch, ci) => (
-                    <motion.span key={`l3-${wi}-${ci}`} variants={charRevealChild} className="inline-block">
-                      {ch}
-                    </motion.span>
-                  ))}
-                  {wi < arr.length - 1 && (
-                    wi === 1 ? (
-                      <>
-                        <br className="md:hidden" />
-                        <motion.span variants={charRevealChild} className="hidden md:inline-block w-[0.3em]" />
-                      </>
-                    ) : (
-                      <motion.span variants={charRevealChild} className="inline-block w-[0.3em]" />
-                    )
-                  )}
-                </span>
-              ))}
-            </span>
-          </motion.h1>
+          {isMobile ? (
+            /* Mobile: plain text, no per-char animation */
+            <h1
+              className="mt-5 leading-[0.92]"
+              style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 'clamp(1.2rem,6vw,5.6rem)' }}
+            >
+              <span className="block text-text">{t.hero.line1}</span>
+              <span className="block num-glow gold-foil">{t.hero.line2}</span>
+              <span className="block text-text">{t.hero.line3}</span>
+            </h1>
+          ) : (
+            /* Desktop: full char-by-char animation */
+            <motion.h1
+              className="mt-5 text-[clamp(1.5rem,8vw,5.6rem)] leading-[0.92]"
+              style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}
+              variants={charRevealParent}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+            >
+              {/* Line 1 */}
+              <span className="block text-text">
+                {[...t.hero.line1].map((ch, i) => (
+                  <motion.span key={`l1-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
+                    {ch === ' ' ? null : ch}
+                  </motion.span>
+                ))}
+              </span>
+              {/* Line 2 — gold */}
+              <span className="block num-glow">
+                {[...t.hero.line2].map((ch, i) => (
+                  <motion.span key={`l2-${i}`} variants={charRevealChild} className={`inline-block gold-foil${ch === ' ' ? ' w-[0.3em]' : ''}`}>
+                    {ch === ' ' ? null : ch}
+                  </motion.span>
+                ))}
+              </span>
+              {/* Line 3 — break after 2nd word on mobile */}
+              <span className="block text-text">
+                {t.hero.line3.split(' ').map((word, wi, arr) => (
+                  <span key={`l3w-${wi}`} className="inline">
+                    {[...word].map((ch, ci) => (
+                      <motion.span key={`l3-${wi}-${ci}`} variants={charRevealChild} className="inline-block">
+                        {ch}
+                      </motion.span>
+                    ))}
+                    {wi < arr.length - 1 && (
+                      wi === 1 ? (
+                        <>
+                          <br className="md:hidden" />
+                          <motion.span variants={charRevealChild} className="hidden md:inline-block w-[0.3em]" />
+                        </>
+                      ) : (
+                        <motion.span variants={charRevealChild} className="inline-block w-[0.3em]" />
+                      )
+                    )}
+                  </span>
+                ))}
+              </span>
+            </motion.h1>
+          )}
 
           <motion.p
             className="mt-6 max-w-md text-base text-muted sm:text-lg"
