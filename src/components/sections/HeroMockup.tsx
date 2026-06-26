@@ -87,7 +87,7 @@ export function HeroMockup() {
       className="relative mx-auto w-full max-w-[360px]"
     >
     <motion.div
-      whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212,175,55,0.2), 0 20px 60px rgba(0,0,0,0.4)' }}
+      whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(212,175,55,0.3), 0 20px 60px rgba(0,0,0,0.4)' }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {/* glow behind card */}
