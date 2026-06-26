@@ -48,9 +48,7 @@ function FreeLimitBanner({ onClose }: { onClose: () => void }) {
       </p>
       <button
         onClick={() => { onClose(); setTimeout(scrollToPlanos, 150); }}
-        style={{ background: 'linear-gradient(135deg, #D4AF37, #a07c20)', color: '#000000', border: 'none', borderRadius: '10px', padding: '16px 40px', fontSize: '15px', fontWeight: '900', cursor: 'pointer', letterSpacing: '1px', boxShadow: '0 0 30px rgba(212,175,55,0.4), 0 4px 20px rgba(0,0,0,0.5)', transform: 'perspective(800px) rotateX(2deg)', transition: 'all 0.3s ease', textTransform: 'uppercase' }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 50px rgba(212,175,55,0.6), 0 8px 30px rgba(0,0,0,0.6)'; e.currentTarget.style.transform = 'perspective(800px) rotateX(2deg) scale(1.03)'; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 0 30px rgba(212,175,55,0.4), 0 4px 20px rgba(0,0,0,0.5)'; e.currentTarget.style.transform = 'perspective(800px) rotateX(2deg)'; }}
+        className="btn-gold gold-glow rounded-xzk px-7 py-3.5 text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
       >
         VER PLANOS
       </button>
