@@ -145,11 +145,6 @@ export default function AnalyzerModal() {
         return;
       }
       if (q.remaining !== null && q.remaining <= 0) {
-        if (plan === 'free') {
-          close();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return;
-        }
         setNextResetAt(q.nextResetAt);
         setLimitPlan(plan);
         setStep('limit');
