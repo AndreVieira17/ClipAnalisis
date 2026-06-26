@@ -165,7 +165,7 @@ const pt: Translations = {
   },
   finalCta: {
     line1a: 'PARA DE', line1b: 'CHUTAR', line2a: 'COMEÇA A', line2b: 'ESTOURAR',
-    subtitle: 'Manda o vídeo + o print agora. O primeiro raio-X é de graça.',
+    subtitle: 'Manda o teu clip agora. O primeiro raio-X é de graça.',
     cta: 'ANALISAR MEU CLIP GRÁTIS',
   },
   footer: {
@@ -287,7 +287,7 @@ const en: Translations = {
   },
   finalCta: {
     line1a: 'STOP', line1b: 'GUESSING', line2a: 'START', line2b: 'GOING VIRAL',
-    subtitle: 'Send the video + the screenshot now. The first X-ray is free.',
+    subtitle: 'Send your clip now. The first X-ray is free.',
     cta: 'ANALYZE MY CLIP FOR FREE',
   },
   footer: {
@@ -409,7 +409,7 @@ const es: Translations = {
   },
   finalCta: {
     line1a: 'DEJA DE', line1b: 'ADIVINAR', line2a: 'EMPIEZA A', line2b: 'EXPLOTAR',
-    subtitle: 'Envía el vídeo + la captura ahora. El primer análisis es gratis.',
+    subtitle: 'Envía tu clip ahora. El primer análisis es gratis.',
     cta: 'ANALIZAR MI CLIP GRATIS',
   },
   footer: {
