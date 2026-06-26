@@ -264,7 +264,7 @@ export default function AnalyzerModal() {
               ) : loading ? (
                 <p className="py-16 text-center text-muted">Carregando...</p>
               ) : !session ? (
-                <AuthGate />
+                <AuthGate onAuthSuccess={() => { close(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
               ) : step === 'checking' ? (
                 <p className="py-16 text-center text-muted">Carregando...</p>
               ) : step === 'upload' ? (

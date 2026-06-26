@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 type ForgotStep = 'hidden' | 'code';
 
-export function AuthGate() {
+export function AuthGate({ onAuthSuccess }: { onAuthSuccess?: () => void } = {}) {
   const [mode, setMode] = useState<'in' | 'up'>('up');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,11 +24,12 @@ export function AuthGate() {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-        if (loginError) setMsg('Conta criada! Faz login para entrar.');
+        if (loginError) { setMsg('Conta criada! Faz login para entrar.'); return; }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
+      onAuthSuccess?.();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Erro ao autenticar.');
     } finally {
