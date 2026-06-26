@@ -86,6 +86,10 @@ export function HeroMockup() {
       transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
       className="relative mx-auto w-full max-w-[360px]"
     >
+    <motion.div
+      whileHover={{ scale: 1.03, boxShadow: '0 0 40px rgba(212,175,55,0.2), 0 20px 60px rgba(0,0,0,0.4)' }}
+      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+    >
       {/* glow behind card */}
       <div
         aria-hidden
@@ -143,6 +147,7 @@ export function HeroMockup() {
           </p>
         </motion.div>
       </div>
+    </motion.div>
     </motion.div>
   );
 }
