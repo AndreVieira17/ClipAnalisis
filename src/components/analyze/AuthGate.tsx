@@ -153,7 +153,9 @@ export function AuthGate() {
           <button
             onClick={handleVerifyOtp}
             disabled={busy}
-            style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}
+            style={{ width: '100%', background: 'linear-gradient(135deg, #D4AF37, #a07c20)', color: '#000000', border: 'none', borderRadius: '10px', padding: '16px 40px', fontSize: '15px', fontWeight: '900', cursor: 'pointer', letterSpacing: '1px', boxShadow: '0 0 30px rgba(212,175,55,0.4), 0 4px 20px rgba(0,0,0,0.5)', transform: 'perspective(800px) rotateX(2deg)', transition: 'all 0.3s ease', textTransform: 'uppercase' }}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 0 50px rgba(212,175,55,0.6), 0 8px 30px rgba(0,0,0,0.6)'; e.currentTarget.style.transform = 'perspective(800px) rotateX(2deg) scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 0 30px rgba(212,175,55,0.4), 0 4px 20px rgba(0,0,0,0.5)'; e.currentTarget.style.transform = 'perspective(800px) rotateX(2deg)'; }}
           >
             {busy ? '...' : 'VERIFICAR CÓDIGO'}
           </button>
