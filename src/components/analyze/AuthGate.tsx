@@ -143,17 +143,17 @@ export function AuthGate() {
           <input
             type="text"
             inputMode="numeric"
-            placeholder="Código de 6 dígitos"
+            placeholder="• • • • • •"
             value={otpCode}
             onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             maxLength={6}
-            style={{ ...inputInline, textAlign: 'center', fontSize: '22px', letterSpacing: '8px' }}
+            style={{ width: '100%', background: '#1a1a1a', border: '1px solid #333333', borderRadius: '8px', padding: '14px 16px', color: '#ffffff', fontSize: '20px', textAlign: 'center', letterSpacing: '8px', boxSizing: 'border-box', outline: 'none' }}
           />
           {msg && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{msg}</p>}
           <button
             onClick={handleVerifyOtp}
             disabled={busy}
-            style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}
+            style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}
           >
             {busy ? '...' : 'VERIFICAR CÓDIGO'}
           </button>
