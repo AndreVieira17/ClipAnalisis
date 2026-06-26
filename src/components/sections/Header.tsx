@@ -111,7 +111,7 @@ function UserDropdown({
   ).toUpperCase() || 'XZ';
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-[300px] rounded-xzk border border-border bg-bg/98 backdrop-blur-md shadow-2xl z-50 overflow-hidden">
+    <div className="absolute right-0 top-full mt-2 w-[300px] rounded-xzk border border-zinc-800 bg-[#0a0a0a] shadow-xl z-50 overflow-hidden">
       {/* Avatar + info */}
       <div className="flex items-center gap-4 px-5 py-5 border-b border-border bg-surface/30">
         <div className="w-12 h-12 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center shrink-0">
@@ -205,7 +205,7 @@ function MobileDrawer({
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/* panel — slides in from right */}
-      <div className="absolute inset-y-0 right-0 flex w-[80vw] max-w-xs flex-col bg-bg border-l border-border shadow-2xl">
+      <div className="absolute inset-y-0 right-0 flex w-[80vw] max-w-xs flex-col bg-[#0a0a0a] border-l border-zinc-800 shadow-xl">
         {/* header row */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted">Menu</span>
