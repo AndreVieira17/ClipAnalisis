@@ -99,17 +99,6 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
           ? { border: '1px solid #3f3f46', background: '#111111' }
           : {};
 
-  /* ── Card hover base/hover box-shadow ── */
-  const cardBaseBoxShadow = pro
-    ? '0 0 60px rgba(212,175,55,0.3), 0 8px 40px rgba(0,0,0,0.6)'
-    : elite
-      ? '0 0 30px rgba(212,175,55,0.12)'
-      : 'none';
-  const cardHoverBoxShadow = pro
-    ? '0 0 70px rgba(212,175,55,0.4), 0 20px 60px rgba(0,0,0,0.6)'
-    : '0 0 50px rgba(212,175,55,0.25), 0 20px 60px rgba(0,0,0,0.5)';
-  const cardBaseScale = pro ? 'scale(1.03)' : 'scale(1)';
-  const cardHoverScale = pro ? 'scale(1.06)' : 'scale(1.035)';
 
   return (
     <div
@@ -121,12 +110,16 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
         cursor: 'default',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.transform = cardHoverScale;
-        e.currentTarget.style.boxShadow = cardHoverBoxShadow;
+        (e.currentTarget as HTMLDivElement).style.transform = pro ? 'scale(1.065)' : 'scale(1.035)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = pro
+          ? '0 0 70px rgba(212,175,55,0.4), 0 20px 60px rgba(0,0,0,0.6)'
+          : '0 0 50px rgba(212,175,55,0.25), 0 20px 60px rgba(0,0,0,0.5)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.transform = cardBaseScale;
-        e.currentTarget.style.boxShadow = cardBaseBoxShadow;
+        (e.currentTarget as HTMLDivElement).style.transform = pro ? 'scale(1.03)' : 'scale(1)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = pro
+          ? '0 0 60px rgba(212,175,55,0.3), 0 8px 40px rgba(0,0,0,0.6)'
+          : 'none';
       }}
     >
     <PopCard
@@ -184,10 +177,8 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
         onClick={handleClick}
         disabled={loading}
         className={[
-          'mt-7 w-full rounded-xzk px-5 py-3.5 text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60',
-          isFree
-            ? 'btn-ghost font-semibold'
-            : 'btn-gold gold-glow hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)]',
+          'mt-7 w-full inline-flex items-center justify-center rounded-xzk px-5 sm:px-5 py-3.5 text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98] disabled:opacity-60',
+          isFree ? 'btn-ghost font-semibold' : 'btn-gold',
         ].join(' ')}
       >
         {loading ? (
