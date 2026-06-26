@@ -61,9 +61,8 @@ export function Analyzed() {
             <motion.div
               key={a.tag}
               variants={staggerChild}
-              style={{ transition: 'transform 0.3s ease, box-shadow 0.3s ease', borderRadius: '12px' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 20px rgba(212,175,55,0.12)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}
+              whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-6 transition-colors hover:border-gold/40">
                 <span className="chip rounded px-2 py-0.5">{a.tag}</span>
