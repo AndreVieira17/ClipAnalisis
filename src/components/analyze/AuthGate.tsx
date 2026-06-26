@@ -114,16 +114,14 @@ export function AuthGate() {
         {mode === 'up' ? 'Já tenho conta — entrar' : 'Criar conta nova'}
       </button>
 
-      {mode === 'in' && (
-        <button
-          type="button"
-          onClick={handleForgotPassword}
-          className="mt-2 w-full text-center text-sm"
-          style={{ color: '#D4AF37', background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          Esqueceste a senha?
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={handleForgotPassword}
+        className="mt-2 w-full text-center text-sm"
+        style={{ color: '#D4AF37', background: 'none', border: 'none', cursor: 'pointer' }}
+      >
+        Esqueceste a senha?
+      </button>
     </div>
   );
 }
