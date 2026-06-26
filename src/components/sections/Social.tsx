@@ -30,7 +30,13 @@ export function Social() {
           className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3"
         >
           {t.social.testimonials.map((s) => (
-            <motion.div key={s.author} variants={staggerChild}>
+            <motion.div
+              key={s.author}
+              variants={staggerChild}
+              style={{ transition: 'transform 0.3s ease, box-shadow 0.3s ease', borderRadius: '12px' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 20px rgba(212,175,55,0.12)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}
+            >
               <PopCard className="flex h-full flex-col rounded-xzk border border-border bg-surface/60 p-7">
                 <p className="flex-1 text-lg leading-snug text-text">{'"'}{s.quote}{'"'}</p>
                 <div className="mt-6 flex items-center gap-3">

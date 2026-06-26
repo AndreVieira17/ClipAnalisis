@@ -36,7 +36,13 @@ export function HowItWorks() {
         className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3"
       >
         {t.howItWorks.steps.map((s) => (
-          <motion.div key={s.step} variants={staggerChild}>
+          <motion.div
+            key={s.step}
+            variants={staggerChild}
+            style={{ transition: 'transform 0.3s ease, box-shadow 0.3s ease', borderRadius: '12px' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 20px rgba(212,175,55,0.12)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}
+          >
             <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-7 transition-colors hover:border-gold/40">
               <span className="num-glow gold-foil font-mono text-5xl font-bold">{s.step}</span>
               <h3 className="mt-5 text-2xl">{s.title}</h3>
