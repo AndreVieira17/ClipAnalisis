@@ -41,7 +41,7 @@ export function AuthGate() {
     if (!otpEmail) { setMsg('Introduz o teu email primeiro.'); return; }
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.auth.signInWithOtp({ email: otpEmail });
+    const { error } = await supabase.auth.signInWithOtp({ email: otpEmail, options: { shouldCreateUser: false } });
     setBusy(false);
     if (error) { setMsg(error.message); return; }
     setMsg(null);
@@ -143,7 +143,7 @@ export function AuthGate() {
       {forgotStep === 'hidden' && (
         <button
           type="button"
-          onClick={() => { setForgotStep('email'); setOtpEmail(email); setMsg(null); }}
+          onClick={() => { setForgotStep('email'); setOtpEmail(''); setMsg(null); }}
           className="mt-2 w-full text-center text-sm"
           style={{ color: '#D4AF37', background: 'none', border: 'none', cursor: 'pointer' }}
         >
@@ -164,7 +164,7 @@ export function AuthGate() {
             style={inputInline}
           />
           {msg && <p style={{ color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>{msg}</p>}
-          <button onClick={handleSendOtp} disabled={busy} style={btnGoldInline}>
+          <button onClick={handleSendOtp} disabled={busy} style={{ width: '100%', background: '#D4AF37', color: '#000000', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', letterSpacing: '1px' }}>
             {busy ? '...' : 'ENVIAR CÓDIGO'}
           </button>
           <button
