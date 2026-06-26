@@ -351,7 +351,7 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => open()}
-                  className="hidden sm:inline-flex btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
+                  className="inline-flex btn-gold rounded-xzk px-4 py-2 text-xs sm:px-5 sm:text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)] active:scale-[0.98]"
                 >
                   {t.nav.analyzeClip}
                 </button>
