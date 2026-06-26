@@ -99,43 +99,39 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
           ? { border: '1px solid #3f3f46', background: '#111111' }
           : {};
 
-  /* ── Button styles ── */
-  const btnPremiumStyle: React.CSSProperties = {
-    background: 'linear-gradient(135deg, #D4AF37, #a07c20)',
-    color: '#000000',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '14px',
-    fontSize: '14px',
-    fontWeight: '900',
-    cursor: 'pointer',
-    letterSpacing: '1px',
-    width: '100%',
-    marginTop: '28px',
-    boxShadow: '0 0 20px rgba(212,175,55,0.25)',
-    transition: 'all 0.3s ease',
-  };
-
-  const btnGhostStyle: React.CSSProperties = {
-    background: 'transparent',
-    color: '#D4AF37',
-    border: '1px solid rgba(212,175,55,0.5)',
-    borderRadius: '8px',
-    padding: '14px',
-    fontSize: '14px',
-    fontWeight: '700',
-    cursor: 'pointer',
-    letterSpacing: '0.5px',
-    width: '100%',
-    marginTop: '28px',
-    transition: 'all 0.3s ease',
-  };
+  /* ── Card hover base/hover box-shadow ── */
+  const cardBaseBoxShadow = pro
+    ? '0 0 60px rgba(212,175,55,0.3), 0 8px 40px rgba(0,0,0,0.6)'
+    : elite
+      ? '0 0 30px rgba(212,175,55,0.12)'
+      : 'none';
+  const cardHoverBoxShadow = pro
+    ? '0 0 70px rgba(212,175,55,0.4), 0 20px 60px rgba(0,0,0,0.6)'
+    : '0 0 50px rgba(212,175,55,0.25), 0 20px 60px rgba(0,0,0,0.5)';
+  const cardBaseScale = pro ? 'scale(1.03)' : 'scale(1)';
+  const cardHoverScale = pro ? 'scale(1.06)' : 'scale(1.035)';
 
   return (
-    <div style={{ borderRadius: '16px', height: '100%', ...cardStyle }}>
+    <div
+      style={{
+        borderRadius: '16px',
+        height: '100%',
+        ...cardStyle,
+        transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease',
+        cursor: 'default',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = cardHoverScale;
+        e.currentTarget.style.boxShadow = cardHoverBoxShadow;
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = cardBaseScale;
+        e.currentTarget.style.boxShadow = cardBaseBoxShadow;
+      }}
+    >
     <PopCard
       intensity={pro ? 'strong' : 'soft'}
-      className="flex h-full flex-col rounded-xzk-lg p-7 transition-all duration-500 ease-out"
+      className="flex h-full flex-col rounded-xzk-lg p-7"
     >
       {pro && (
         <span
@@ -187,19 +183,12 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        style={isFree ? btnGhostStyle : btnPremiumStyle}
-        onMouseEnter={e => {
-          if (!isFree) {
-            e.currentTarget.style.boxShadow = '0 0 35px rgba(212,175,55,0.45)';
-            e.currentTarget.style.transform = 'scale(1.02)';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isFree) {
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(212,175,55,0.25)';
-            e.currentTarget.style.transform = 'scale(1)';
-          }
-        }}
+        className={[
+          'mt-7 w-full rounded-xzk px-5 py-3.5 text-sm transition-all duration-[400ms] ease-out hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60',
+          isFree
+            ? 'btn-ghost font-semibold'
+            : 'btn-gold gold-glow hover:shadow-[0_4px_24px_rgba(212,175,55,0.35)]',
+        ].join(' ')}
       >
         {loading ? (
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
