@@ -175,7 +175,7 @@ function MobileDrawer({
   onClose: () => void;
   onAnalyze: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang, setLanguage } = useI18n();
 
   // Close on Escape
   useEffect(() => {
@@ -236,8 +236,25 @@ function MobileDrawer({
 
         {/* language selector + CTA at bottom */}
         <div className="px-4 pb-8 flex flex-col gap-3 border-t border-border pt-5">
-          <div className="flex justify-center">
-            <LangSelector />
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            {(['PT', 'EN', 'ES'] as const).map(l => (
+              <button
+                key={l}
+                onClick={() => { setLanguage(l.toLowerCase() as Lang); onClose(); }}
+                style={{
+                  background: lang === l.toLowerCase() ? '#D4AF37' : 'transparent',
+                  color: lang === l.toLowerCase() ? '#000000' : '#ffffff',
+                  border: '1px solid #333333',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                }}
+              >
+                {l}
+              </button>
+            ))}
           </div>
           <button
             type="button"
