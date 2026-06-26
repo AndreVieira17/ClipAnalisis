@@ -7,7 +7,7 @@ import { useI18n } from '@/lib/i18n';
 
 const STAT_VALUES = [
   { value: 312, prefix: '+', suffix: '%', decimals: 0 },
-  { value: 9,   prefix: '',  suffix: ' pontos', decimals: 0 },
+  { value: 20,  prefix: '',  suffix: ' pontos', decimals: 0 },
   { value: 2,   prefix: '',  suffix: ' min', decimals: 0 },
   { value: 1.2, prefix: '',  suffix: 'M', decimals: 1 },
 ];

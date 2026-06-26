@@ -139,7 +139,7 @@ const pt: Translations = {
   plans: {
     chip: 'PLANOS', title: 'Escolhe o teu', titleHighlight: 'nível', mostChosen: 'MAIS ESCOLHIDO',
     items: [
-      { id: 'free', name: 'FREE', price: '0€', cadence: '/dia', tagline: '1 análise por dia, reset às 24h. Sem cartão.', features: ['1 análise / dia (reset 24h)', '6 pilares frame a frame + evidência', 'Diagnóstico de retenção', 'Veredito + gargalo', 'Estratégias de crescimento'], cta: 'COMEÇAR GRÁTIS' },
+      { id: 'free', name: 'FREE', price: '0€', cadence: '', tagline: '1 análise grátis. Sem cartão.', features: ['1 análise grátis', '6 pilares frame a frame + evidência', 'Diagnóstico de retenção', 'Veredito + gargalo', 'Estratégias de crescimento'], cta: 'COMEÇAR GRÁTIS' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mês', tagline: 'Pra começar a postar com direção todo mês.', features: ['10 análises / mês', '6 pilares + evidência + retenção', 'Veredito + gargalo', 'Até 3 correções prioritárias', '1 áudio / fonte / tutorial'], cta: 'ASSINAR STARTER' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mês', tagline: 'Pro clipador que vive de postar e quer estourar.', features: ['Análises ILIMITADAS', 'Correções prioritárias completas', 'Estratégias de crescimento', 'Áudios / fontes / tutoriais completos', 'Prioridade na fila'], cta: 'VIRAR PRO', highlight: 'pro' },
       { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mês', tagline: 'Pra quem vive disso. Pro + revisão humana incluída.', features: ['Tudo do Pro, ilimitado', 'Revisão humana do clip', 'Roteiro de edição com timestamps', 'Prioridade máxima na fila', 'Benchmark com virais do nicho', 'Acesso ao grupo privado no Telegram 💬'], cta: 'ENTRAR NO ELITE', highlight: 'elite' },
@@ -156,7 +156,7 @@ const pt: Translations = {
   faq: {
     chip: 'DÚVIDAS', title: 'FAQ',
     items: [
-      { q: 'PRECISO MANDAR O PRINT MESMO?', a: 'O print das métricas é o que deixa o raio-X cirúrgico. Sem ele a gente analisa só a edição; com ele, cruzamos com a retenção real.' },
+      { q: 'O QUE PRECISO DE ENVIAR?', a: 'Faz upload do teu clip directamente na plataforma — não precisas de nenhum print ou screenshot. A IA analisa o vídeo frame a frame e devolve o raio-X completo.' },
       { q: 'FUNCIONA PRA QUALQUER NICHO?', a: 'Sim. Humor, gameplay, reação, podcast, lifestyle. A IA calibra o ritmo ideal pro teu formato.' },
       { q: 'É SÓ CLIP DE STREAM?', a: 'Não. Qualquer vídeo curto vertical — Reels, Shorts, TikTok. O mecanismo é o mesmo: o que prende e o que mata.' },
       { q: 'MEUS VÍDEOS FICAM GUARDADOS?', a: 'Só o tempo da análise. Você controla e pode apagar quando quiser. Nada vira conteúdo de terceiros.' },
@@ -183,8 +183,8 @@ const pt: Translations = {
     day: 'DIA', goal: 'Meta',
   },
   modal: {
-    limitTitle: 'LIMITE DIÁRIO ATINGIDO',
-    limitMsg: 'Já usaste a tua análise gratuita hoje. Próxima análise disponível em:',
+    limitTitle: 'LIMITE ATINGIDO',
+    limitMsg: 'Já usaste a tua análise grátis. Faz upgrade para continuar sem limites.',
     available: 'Disponível agora!', viewPlans: 'VER PLANOS — ANALISAR SEM LIMITES', back: '← Voltar',
     uploadingTitle: 'A FAZER UPLOAD…', uploadingMsg: 'A enviar o vídeo para o servidor…',
     analyzingTitle: 'ANALISANDO O CLIP', analyzingMsg: 'Lendo frame a frame — fala, legenda, música, efeitos e final. Pode levar 1–3 min.',
@@ -261,7 +261,7 @@ const en: Translations = {
   plans: {
     chip: 'PLANS', title: 'Choose your', titleHighlight: 'clipper level', mostChosen: 'MOST POPULAR',
     items: [
-      { id: 'free', name: 'FREE', price: '0€', cadence: '/day', tagline: '1 analysis per day, resets every 24h. No card.', features: ['1 analysis / day (24h reset)', '6 pillars frame by frame + evidence', 'Retention diagnosis', 'Verdict + bottleneck', 'Growth strategies'], cta: 'START FOR FREE' },
+      { id: 'free', name: 'FREE', price: '0€', cadence: '', tagline: '1 free analysis. No card.', features: ['1 free analysis', '6 pillars frame by frame + evidence', 'Retention diagnosis', 'Verdict + bottleneck', 'Growth strategies'], cta: 'START FOR FREE' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mo', tagline: 'For those starting to post with direction every month.', features: ['10 analyses / month', '6 pillars + evidence + retention', 'Verdict + bottleneck', 'Up to 3 priority corrections', '1 audio / source / tutorial'], cta: 'GET STARTER' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mo', tagline: 'For the clipper who lives to post and wants to go viral.', features: ['UNLIMITED analyses', 'Complete priority corrections', 'Growth strategies', 'Full audios / sources / tutorials', 'Priority queue'], cta: 'GO PRO', highlight: 'pro' },
       { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mo', tagline: 'For those who live off this. Pro + human review included.', features: ['Everything in Pro, unlimited', 'Human clip review', 'Editing script with timestamps', 'Maximum priority queue', 'Benchmark with niche virals', 'Access to private Telegram group 💬'], cta: 'JOIN ELITE', highlight: 'elite' },
@@ -278,7 +278,7 @@ const en: Translations = {
   faq: {
     chip: 'QUESTIONS', title: 'FAQ',
     items: [
-      { q: 'DO I NEED TO SEND THE SCREENSHOT?', a: 'The metrics screenshot is what makes the X-ray surgical. Without it we only analyze the editing; with it, we cross it with real retention.' },
+      { q: 'WHAT DO I NEED TO SEND?', a: 'Just upload your clip directly on the platform — no screenshot or print needed. The AI analyzes the video frame by frame and returns the full X-ray.' },
       { q: 'DOES IT WORK FOR ANY NICHE?', a: 'Yes. Humor, gameplay, reaction, podcast, lifestyle. The AI calibrates the ideal rhythm for your format.' },
       { q: 'IS IT ONLY FOR STREAM CLIPS?', a: 'No. Any short vertical video — Reels, Shorts, TikTok. The mechanism is the same: what hooks and what kills.' },
       { q: 'ARE MY VIDEOS STORED?', a: "Only during the analysis. You control it and can delete whenever you want. Nothing becomes third-party content." },
@@ -305,8 +305,8 @@ const en: Translations = {
     day: 'DAY', goal: 'Goal',
   },
   modal: {
-    limitTitle: 'DAILY LIMIT REACHED',
-    limitMsg: "You've used your free analysis today. Next analysis available in:",
+    limitTitle: 'LIMIT REACHED',
+    limitMsg: "You've used your free analysis. Upgrade to continue without limits.",
     available: 'Available now!', viewPlans: 'SEE PLANS — ANALYZE WITHOUT LIMITS', back: '← Back',
     uploadingTitle: 'UPLOADING…', uploadingMsg: 'Sending the video to the server…',
     analyzingTitle: 'ANALYZING CLIP', analyzingMsg: 'Reading frame by frame — speech, caption, music, effects and ending. May take 1–3 min.',
@@ -383,7 +383,7 @@ const es: Translations = {
   plans: {
     chip: 'PLANES', title: 'Elige tu', titleHighlight: 'nivel de clipper', mostChosen: 'MÁS ELEGIDO',
     items: [
-      { id: 'free', name: 'FREE', price: '0€', cadence: '/día', tagline: '1 análisis por día, reset cada 24h. Sin tarjeta.', features: ['1 análisis / día (reset 24h)', '6 pilares fotograma a fotograma + evidencia', 'Diagnóstico de retención', 'Veredicto + cuello de botella', 'Estrategias de crecimiento'], cta: 'EMPEZAR GRATIS' },
+      { id: 'free', name: 'FREE', price: '0€', cadence: '', tagline: '1 análisis gratis. Sin tarjeta.', features: ['1 análisis gratis', '6 pilares fotograma a fotograma + evidencia', 'Diagnóstico de retención', 'Veredicto + cuello de botella', 'Estrategias de crecimiento'], cta: 'EMPEZAR GRATIS' },
       { id: 'starter', name: 'STARTER', price: '9.99€', cadence: '/mes', tagline: 'Para empezar a publicar con dirección cada mes.', features: ['10 análisis / mes', '6 pilares + evidencia + retención', 'Veredicto + cuello de botella', 'Hasta 3 correcciones prioritarias', '1 audio / fuente / tutorial'], cta: 'SUSCRIBIRSE' },
       { id: 'pro', name: 'PRO', price: '24.99€', cadence: '/mes', tagline: 'Para el clipper que vive de publicar y quiere explotar.', features: ['Análisis ILIMITADOS', 'Correcciones prioritarias completas', 'Estrategias de crecimiento', 'Audios / fuentes / tutoriales completos', 'Cola prioritaria'], cta: 'HACERSE PRO', highlight: 'pro' },
       { id: 'elite', name: 'ELITE', price: '39.99€', cadence: '/mes', tagline: 'Para quienes viven de esto. Pro + revisión humana incluida.', features: ['Todo de Pro, ilimitado', 'Revisión humana del clip', 'Guión de edición con timestamps', 'Cola de máxima prioridad', 'Benchmark con virales del nicho', 'Acceso al grupo privado de Telegram 💬'], cta: 'UNIRSE AL ELITE', highlight: 'elite' },
@@ -400,7 +400,7 @@ const es: Translations = {
   faq: {
     chip: 'PREGUNTAS', title: 'FAQ',
     items: [
-      { q: '¿NECESITO ENVIAR LA CAPTURA?', a: 'La captura de métricas es lo que hace el análisis quirúrgico. Sin ella solo analizamos la edición; con ella, cruzamos con la retención real.' },
+      { q: '¿QUÉ NECESITO ENVIAR?', a: 'Sube tu clip directamente en la plataforma — no necesitas ninguna captura o screenshot. La IA analiza el vídeo fotograma a fotograma y devuelve el análisis completo.' },
       { q: '¿FUNCIONA PARA CUALQUIER NICHO?', a: 'Sí. Humor, gameplay, reacción, podcast, lifestyle. La IA calibra el ritmo ideal para tu formato.' },
       { q: '¿ES SOLO PARA CLIPS DE STREAM?', a: 'No. Cualquier vídeo corto vertical — Reels, Shorts, TikTok. El mecanismo es el mismo: lo que engancha y lo que mata.' },
       { q: '¿MIS VÍDEOS SE GUARDAN?', a: 'Solo el tiempo del análisis. Tú controlas y puedes eliminar cuando quieras. Nada se convierte en contenido de terceros.' },
@@ -427,8 +427,8 @@ const es: Translations = {
     day: 'DÍA', goal: 'Meta',
   },
   modal: {
-    limitTitle: 'LÍMITE DIARIO ALCANZADO',
-    limitMsg: 'Ya usaste tu análisis gratuito hoy. Próximo análisis disponible en:',
+    limitTitle: 'LÍMITE ALCANZADO',
+    limitMsg: 'Ya usaste tu análisis gratis. Mejora tu plan para continuar sin límites.',
     available: '¡Disponible ahora!', viewPlans: 'VER PLANES — ANALIZAR SIN LÍMITES', back: '← Volver',
     uploadingTitle: 'SUBIENDO…', uploadingMsg: 'Enviando el vídeo al servidor…',
     analyzingTitle: 'ANALIZANDO CLIP', analyzingMsg: 'Leyendo fotograma a fotograma — habla, subtítulo, música, efectos y final. Puede tardar 1–3 min.',

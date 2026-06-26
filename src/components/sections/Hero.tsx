@@ -55,7 +55,7 @@ export function Hero() {
               ))}
             </span>
             {/* Line 3 — plain */}
-            <span className="block text-text">
+            <span className="block text-text whitespace-nowrap">
               {[...t.hero.line3].map((ch, i) => (
                 <motion.span key={`l3-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
                   {ch === ' ' ? null : ch}

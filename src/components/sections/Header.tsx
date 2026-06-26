@@ -338,8 +338,8 @@ export function Header() {
                   {t.nav.analyzeClip}
                 </button>
 
-                {/* User icon → dropdown (desktop) */}
-                <div className="hidden sm:block relative" ref={dropdownRef}>
+                {/* User icon → dropdown */}
+                <div className="relative" ref={dropdownRef}>
                   <button
                     type="button"
                     onClick={() => setDropdownOpen((v) => !v)}

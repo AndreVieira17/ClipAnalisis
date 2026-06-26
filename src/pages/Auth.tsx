@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
 import { supabase, supabaseReady, supabaseNotReadyReason } from '@/lib/supabase';
@@ -11,6 +12,7 @@ export default function Auth() {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
@@ -54,6 +56,17 @@ export default function Auth() {
     setLoading(false);
   }
 
+  async function handleForgotPassword() {
+    if (!email) {
+      setMessage({ text: 'Introduz o teu email primeiro.', type: 'error' });
+      return;
+    }
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/auth/reset',
+    });
+    setMessage({ text: 'Email de recuperação enviado! Verifica a tua caixa de correio.', type: 'success' });
+  }
+
   const inputClass =
     'w-full bg-app-bg-primary border border-app-border-default rounded-[var(--app-radius-md)] px-3 py-2.5 text-sm font-inter text-app-text-primary placeholder:text-app-text-muted outline-none focus:border-app-accent focus:ring-1 focus:ring-app-accent transition-colors';
 
@@ -86,17 +99,38 @@ export default function Auth() {
           <label htmlFor="password" className="block text-xs font-inter font-medium text-app-text-secondary mb-1.5">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={6}
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            placeholder="mínimo 6 caracteres"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              minLength={6}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              placeholder="mínimo 6 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`${inputClass} pr-10`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-app-text-muted hover:text-app-text-primary transition-colors"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          {mode === 'login' && (
+            <div className="mt-1.5 text-right">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-xs text-app-text-muted hover:text-app-accent transition-colors"
+              >
+                Esqueceste a senha?
+              </button>
+            </div>
+          )}
         </div>
 
         {message && (

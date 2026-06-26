@@ -10,6 +10,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { useI18n, type PlanT } from '@/lib/i18n';
 
+const FAKE_ORIGINAL: Partial<Record<string, string>> = {
+  starter: '19.99€',
+  pro: '49.99€',
+};
+
 function Check() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="mt-0.5 shrink-0">
@@ -98,7 +103,13 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
       </div>
       <p className="mt-2 min-h-[2.5rem] text-sm text-muted">{plan.tagline}</p>
 
-      <div className="mt-5 flex items-end gap-1">
+      {FAKE_ORIGINAL[plan.id] && (
+        <div className="mt-4 flex items-center gap-2">
+          <span className="font-mono text-sm text-muted line-through">{FAKE_ORIGINAL[plan.id]}</span>
+          <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-bold text-white" style={{ background: '#ef4444' }}>50% OFF</span>
+        </div>
+      )}
+      <div className={`flex items-end gap-1 ${FAKE_ORIGINAL[plan.id] ? 'mt-1' : 'mt-5'}`}>
         <span className="num-glow gold-foil font-mono text-4xl font-bold">{plan.price}</span>
         <span className="pb-1 font-mono text-xs text-muted">{plan.cadence}</span>
       </div>
