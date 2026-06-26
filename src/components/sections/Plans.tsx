@@ -10,9 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { useI18n, type PlanT } from '@/lib/i18n';
 
-const FAKE_ORIGINAL: Partial<Record<string, string>> = {
-  starter: '19.99€',
-  pro: '49.99€',
+const FAKE_ORIGINAL: Partial<Record<string, { price: string; badge: string }>> = {
+  starter: { price: '14.99€', badge: '34% OFF' },
 };
 
 function Check() {
@@ -105,8 +104,8 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
 
       {FAKE_ORIGINAL[plan.id] && (
         <div className="mt-4 flex items-center gap-2">
-          <span className="font-mono text-sm text-muted line-through">{FAKE_ORIGINAL[plan.id]}</span>
-          <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-bold text-white" style={{ background: '#ef4444' }}>50% OFF</span>
+          <span className="font-mono text-sm text-muted line-through">{FAKE_ORIGINAL[plan.id]!.price}</span>
+          <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-bold text-white" style={{ background: '#ef4444' }}>{FAKE_ORIGINAL[plan.id]!.badge}</span>
         </div>
       )}
       <div className={`flex items-end gap-1 ${FAKE_ORIGINAL[plan.id] ? 'mt-1' : 'mt-5'}`}>

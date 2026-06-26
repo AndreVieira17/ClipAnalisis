@@ -31,7 +31,7 @@ export function Hero() {
           </motion.span>
 
           <motion.h1
-            className="mt-5 text-[clamp(1.8rem,8vw,5.6rem)] leading-[0.92]"
+            className="mt-5 text-[clamp(1.5rem,8vw,5.6rem)] leading-[0.92]"
             style={{ fontFamily: "'Oswald', sans-serif", fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}
             variants={charRevealParent}
             initial="hidden"
@@ -54,12 +54,26 @@ export function Hero() {
                 </motion.span>
               ))}
             </span>
-            {/* Line 3 — plain */}
-            <span className="block text-text whitespace-nowrap">
-              {[...t.hero.line3].map((ch, i) => (
-                <motion.span key={`l3-${i}`} variants={charRevealChild} className={`inline-block${ch === ' ' ? ' w-[0.3em]' : ''}`}>
-                  {ch === ' ' ? null : ch}
-                </motion.span>
+            {/* Line 3 — char-by-char, mobile break after 2nd word */}
+            <span className="block text-text">
+              {t.hero.line3.split(' ').map((word, wi, arr) => (
+                <span key={`l3w-${wi}`} className="inline">
+                  {[...word].map((ch, ci) => (
+                    <motion.span key={`l3-${wi}-${ci}`} variants={charRevealChild} className="inline-block">
+                      {ch}
+                    </motion.span>
+                  ))}
+                  {wi < arr.length - 1 && (
+                    wi === 1 ? (
+                      <>
+                        <br className="md:hidden" />
+                        <motion.span variants={charRevealChild} className="hidden md:inline-block w-[0.3em]" />
+                      </>
+                    ) : (
+                      <motion.span variants={charRevealChild} className="inline-block w-[0.3em]" />
+                    )
+                  )}
+                </span>
               ))}
             </span>
           </motion.h1>

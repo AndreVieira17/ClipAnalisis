@@ -64,7 +64,7 @@ export default function Auth() {
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/auth/reset',
     });
-    setMessage({ text: 'Email de recuperação enviado! Verifica a tua caixa de correio.', type: 'success' });
+    setMessage({ text: 'Email de redefinição enviado! Verifica a tua caixa de correio.', type: 'success' });
   }
 
   const inputClass =
