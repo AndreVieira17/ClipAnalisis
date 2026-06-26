@@ -106,10 +106,10 @@ export default function Auth() {
               required
               minLength={6}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              placeholder="mínimo 6 caracteres"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`${inputClass} pr-10`}
+              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-zinc-500 outline-none focus:border-[#D4AF37] transition-colors text-sm"
             />
             <button
               type="button"
@@ -117,19 +117,18 @@ export default function Auth() {
               aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {mode === 'login' && (
-            <div className="mt-1.5 text-right">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-xs text-[#D4AF37] hover:text-[#f0d060] transition-colors"
-              >
-                Esqueceste a senha?
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="text-sm text-right w-full mt-1"
+              style={{ color: '#D4AF37' }}
+            >
+              Esqueceste a senha?
+            </button>
           )}
         </div>
 
