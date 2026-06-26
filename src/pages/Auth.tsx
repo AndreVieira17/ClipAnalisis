@@ -114,7 +114,18 @@ export default function Auth() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white z-10 transition-colors"
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#a1a1aa',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                zIndex: 10,
+                padding: 0,
+              }}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
