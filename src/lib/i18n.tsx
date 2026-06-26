@@ -349,7 +349,7 @@ const es: Translations = {
   },
   hero: {
     chip: 'ANÁLISIS DE VIRALIDAD',
-    line1: '¿TU CLIP NO', line2: 'EXPLOTA?', line3: 'ENCONTRAMOS LO QUE LO MATA.',
+    line1: '¿TU CLIP NO', line2: 'EXPLOTA?', line3: 'HALLAMOS LO QUE LO MATA.',
     subtitle: 'Pega el link de TikTok, Reels o Shorts — o sube el vídeo. ClipAnalisis hace el análisis fotograma a fotograma: qué engancha, qué mata y el corte exacto para reedicitar y viralizar.',
     cta: 'Analizar mi clip', ctaSecondary: 'Ver cómo funciona',
   },

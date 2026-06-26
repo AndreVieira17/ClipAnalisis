@@ -8,6 +8,9 @@ export function Hero() {
   const { t } = useI18n();
 
   const title = `${t.hero.line1}\n${t.hero.line2}\n${t.hero.line3}`;
+  const fontSize = typeof window !== 'undefined' && window.innerWidth < 480
+    ? 'clamp(1rem, 7vw, 2rem)'
+    : 'clamp(1.4rem, 6vw, 5.6rem)';
 
   return (
     <section id="top" className="scanlines relative min-h-[100svh] overflow-hidden pt-28 sm:pt-32">
@@ -36,13 +39,16 @@ export function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="mt-5 leading-[1.05]"
+            className="mt-5"
             style={{
               fontFamily: "'Oswald', sans-serif",
               fontWeight: 900,
-              letterSpacing: '0.05em',
+              lineHeight: 1.05,
+              letterSpacing: '-0.01em',
               textTransform: 'uppercase',
-              fontSize: 'clamp(1.4rem, 6vw, 5.6rem)',
+              fontSize,
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
             }}
           >
             <span className="block text-text">{t.hero.line1}</span>
