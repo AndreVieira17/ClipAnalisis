@@ -116,7 +116,7 @@ const pt: Translations = {
   howItWorks: {
     chip: 'O MECANISMO', title: 'Três passos pra parar de', titleHighlight: 'postar no escuro',
     steps: [
-      { step: '01', title: 'MANDA O VÍDEO + O PRINT', body: 'Sobe o clip e o print das métricas (retenção, views, gráfico). Quanto mais cru, melhor o raio-X.' },
+      { step: '01', title: 'MANDA O TEU CLIP', body: 'Faz upload do teu clip directamente. A IA analisa tudo frame a frame.' },
       { step: '02', title: 'A ClipAnalisis FAZ O RAIO-X', body: 'A IA cruza edição, ritmo, áudio e gancho com o que de fato segura a audiência. Frame a frame.' },
       { step: '03', title: 'VOCÊ REEDITA E ESTOURA', body: 'Recebe o que prende, o que MATA e o corte exato pra refazer. Aplica e reposta pra viralizar.' },
     ],
@@ -169,7 +169,7 @@ const pt: Translations = {
     cta: 'ANALISAR MEU CLIP GRÁTIS',
   },
   footer: {
-    description: 'Raio-X de viralização pra clipador. Manda o vídeo + o print, descobre o que mata teu clip.',
+    description: 'Raio-X de viralização pra clipador. Manda o teu clip, descobre o que o mata.',
     links: { howItWorks: 'Como funciona', whatAnalyzed: 'O que é analisado', plans: 'Planos', faq: 'FAQ' },
     copyright: 'Todos os direitos reservados', tagline: 'Feito pra estourar · BR',
   },
@@ -238,7 +238,7 @@ const en: Translations = {
   howItWorks: {
     chip: 'THE MECHANISM', title: 'Three steps to stop', titleHighlight: 'posting in the dark',
     steps: [
-      { step: '01', title: 'SEND THE VIDEO + THE SCREENSHOT', body: 'Upload the clip and the metrics screenshot (retention, views, graph). The rawer, the better the X-ray.' },
+      { step: '01', title: 'SEND YOUR CLIP', body: 'Upload your clip directly. The AI analyzes everything frame by frame.' },
       { step: '02', title: 'ClipAnalisis DOES THE X-RAY', body: 'The AI crosses editing, rhythm, audio and hook with what actually holds the audience. Frame by frame.' },
       { step: '03', title: 'YOU RE-EDIT AND GO VIRAL', body: 'Get what hooks, what KILLS and the exact cut to redo it. Apply and repost to go viral.' },
     ],
@@ -291,7 +291,7 @@ const en: Translations = {
     cta: 'ANALYZE MY CLIP FOR FREE',
   },
   footer: {
-    description: 'Virality X-ray for clippers. Send the video + screenshot, discover what kills your clip.',
+    description: 'Virality X-ray for clippers. Send your clip, discover what kills it.',
     links: { howItWorks: 'How it works', whatAnalyzed: 'What we analyze', plans: 'Plans', faq: 'FAQ' },
     copyright: 'All rights reserved', tagline: 'Built to go viral',
   },
@@ -360,7 +360,7 @@ const es: Translations = {
   howItWorks: {
     chip: 'EL MECANISMO', title: 'Tres pasos para dejar de', titleHighlight: 'publicar a ciegas',
     steps: [
-      { step: '01', title: 'ENVÍA EL VÍDEO + LA CAPTURA', body: 'Sube el clip y la captura de métricas (retención, views, gráfico). Cuanto más crudo, mejor el análisis.' },
+      { step: '01', title: 'ENVÍA TU CLIP', body: 'Sube tu clip directamente. La IA analiza todo fotograma a fotograma.' },
       { step: '02', title: 'ClipAnalisis HACE EL ANÁLISIS', body: 'La IA cruza edición, ritmo, audio y gancho con lo que realmente retiene a la audiencia. Fotograma a fotograma.' },
       { step: '03', title: 'REEDITAS Y EXPLOTA', body: 'Recibe lo que engancha, lo que MATA y el corte exacto para rehacer. Aplica y reposta para viralizar.' },
     ],
@@ -413,7 +413,7 @@ const es: Translations = {
     cta: 'ANALIZAR MI CLIP GRATIS',
   },
   footer: {
-    description: 'Análisis de viralidad para clippers. Envía el vídeo + la captura, descubre lo que mata tu clip.',
+    description: 'Análisis de viralidad para clippers. Envía tu clip, descubre lo que lo mata.',
     links: { howItWorks: 'Cómo funciona', whatAnalyzed: 'Qué analizamos', plans: 'Planes', faq: 'FAQ' },
     copyright: 'Todos los derechos reservados', tagline: 'Hecho para explotar',
   },
