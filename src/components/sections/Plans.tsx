@@ -30,25 +30,24 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const isPaid = plan.id !== 'free';
+  const isFree = plan.id === 'free';
   const pro    = plan.highlight === 'pro';
   const elite  = plan.highlight === 'elite';
+  const starter = plan.id === 'starter';
 
   async function handleClick() {
     setCheckoutError(null);
 
     if (!isPaid) {
-      // Free plan — just open the analyzer
       open(plan.id);
       return;
     }
 
     if (!session) {
-      // Not logged in — redirect to auth
       navigate('/auth');
       return;
     }
 
-    // Paid plan + logged in → create Stripe Checkout session
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -80,23 +79,73 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
     }
   }
 
+  /* ── Card styles ── */
+  const cardStyle: React.CSSProperties = pro
+    ? {
+        border: '1.5px solid rgba(212,175,55,0.7)',
+        background: '#141209',
+        boxShadow: '0 0 60px rgba(212,175,55,0.3), 0 8px 40px rgba(0,0,0,0.6)',
+        transform: 'scale(1.03)',
+      }
+    : elite
+      ? {
+          border: '1px solid rgba(212,175,55,0.45)',
+          background: '#111108',
+          boxShadow: '0 0 30px rgba(212,175,55,0.12)',
+        }
+      : isFree
+        ? { border: '1px solid #27272a', background: '#0f0f0f' }
+        : starter
+          ? { border: '1px solid #3f3f46', background: '#111111' }
+          : {};
+
+  /* ── Button styles ── */
+  const btnPremiumStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #D4AF37, #a07c20)',
+    color: '#000000',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '14px',
+    fontSize: '14px',
+    fontWeight: '900',
+    cursor: 'pointer',
+    letterSpacing: '1px',
+    width: '100%',
+    marginTop: '28px',
+    boxShadow: '0 0 20px rgba(212,175,55,0.25)',
+    transition: 'all 0.3s ease',
+  };
+
+  const btnGhostStyle: React.CSSProperties = {
+    background: 'transparent',
+    color: '#D4AF37',
+    border: '1px solid rgba(212,175,55,0.5)',
+    borderRadius: '8px',
+    padding: '14px',
+    fontSize: '14px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    letterSpacing: '0.5px',
+    width: '100%',
+    marginTop: '28px',
+    transition: 'all 0.3s ease',
+  };
+
   return (
+    <div style={{ borderRadius: '16px', height: '100%', ...cardStyle }}>
     <PopCard
       intensity={pro ? 'strong' : 'soft'}
-      className={[
-        'flex h-full flex-col rounded-xzk-lg p-7 transition-all duration-500 ease-out hover:scale-[1.03] hover:shadow-[0_8px_40px_rgba(212,175,55,0.25)]',
-        elite
-          ? 'border border-gold/40 bg-gradient-to-b from-[#15130c] to-bg shadow-gold-strong'
-          : pro
-            ? 'border border-gold/50 bg-surface shadow-gold-glow'
-            : 'border border-border bg-surface/50',
-      ].join(' ')}
+      className="flex h-full flex-col rounded-xzk-lg p-7 transition-all duration-500 ease-out"
     >
       {pro && (
-        <span className="absolute -top-3 left-7 btn-gold rounded-full px-3 py-1 text-[0.65rem]">
+        <span
+          className="absolute -top-3 left-7 rounded-full px-4 py-1.5 text-[0.7rem] font-black tracking-widest"
+          style={{ background: 'linear-gradient(135deg, #D4AF37, #b8960c)', color: '#000000', boxShadow: '0 2px 12px rgba(212,175,55,0.5)' }}
+        >
           {mostChosen}
         </span>
       )}
+
       <div className="flex items-baseline justify-between">
         <h3 className={`text-3xl ${elite || pro ? 'gold-foil' : 'text-text'}`}>{plan.name}</h3>
       </div>
@@ -104,10 +153,16 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
 
       {FAKE_ORIGINAL[plan.id] && (
         <div className="mt-4 flex items-center gap-2">
-          <span className="font-mono text-sm text-muted line-through">{FAKE_ORIGINAL[plan.id]!.price}</span>
-          <span className="rounded px-1.5 py-0.5 text-[0.65rem] font-bold text-white" style={{ background: '#ef4444' }}>{FAKE_ORIGINAL[plan.id]!.badge}</span>
+          <span className="font-mono text-sm text-muted line-through opacity-80">{FAKE_ORIGINAL[plan.id]!.price}</span>
+          <span
+            className="rounded px-2 py-0.5 text-[0.7rem] font-black text-white"
+            style={{ background: '#ff3333', boxShadow: '0 0 8px rgba(255,51,51,0.4)' }}
+          >
+            {FAKE_ORIGINAL[plan.id]!.badge}
+          </span>
         </div>
       )}
+
       <div className={`flex items-end gap-1 ${FAKE_ORIGINAL[plan.id] ? 'mt-1' : 'mt-5'}`}>
         <span className="num-glow gold-foil font-mono text-4xl font-bold">{plan.price}</span>
         <span className="pb-1 font-mono text-xs text-muted">{plan.cadence}</span>
@@ -132,18 +187,30 @@ function PlanCard({ plan, mostChosen }: { plan: PlanT; mostChosen: string }) {
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className={[
-          'mt-7 flex w-full items-center justify-center gap-2 rounded-xzk px-5 py-3 text-center text-sm transition-transform disabled:opacity-60',
-          pro || elite ? 'btn-gold' : 'btn-ghost font-semibold',
-        ].join(' ')}
+        style={isFree ? btnGhostStyle : btnPremiumStyle}
+        onMouseEnter={e => {
+          if (!isFree) {
+            e.currentTarget.style.boxShadow = '0 0 35px rgba(212,175,55,0.45)';
+            e.currentTarget.style.transform = 'scale(1.02)';
+          }
+        }}
+        onMouseLeave={e => {
+          if (!isFree) {
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(212,175,55,0.25)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }
+        }}
       >
         {loading ? (
-          <><Loader2 size={14} className="animate-spin" /> A redirecionar…</>
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Loader2 size={14} className="animate-spin" /> A redirecionar…
+          </span>
         ) : (
           plan.cta
         )}
       </button>
     </PopCard>
+    </div>
   );
 }
 
