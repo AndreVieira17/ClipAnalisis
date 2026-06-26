@@ -67,8 +67,7 @@ export default function Auth() {
     setMessage({ text: 'Email de redefinição enviado! Verifica a tua caixa de entrada.', type: 'success' });
   }
 
-  const inputClass =
-    'w-full bg-app-bg-primary border border-app-border-default rounded-[var(--app-radius-md)] px-3 py-2.5 text-sm font-inter text-app-text-primary placeholder:text-app-text-muted outline-none focus:border-app-accent focus:ring-1 focus:ring-app-accent transition-colors';
+  const inputBase = 'bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white w-full placeholder:text-zinc-500 outline-none focus:border-[#D4AF37] transition-colors text-sm';
 
   return (
     <AuthLayout
@@ -80,8 +79,9 @@ export default function Auth() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-xs font-inter font-medium text-app-text-secondary mb-1.5">
+          <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-1.5">
             Email
           </label>
           <input
@@ -92,14 +92,16 @@ export default function Auth() {
             placeholder="o.teu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
+            className={inputBase}
           />
         </div>
+
+        {/* Password */}
         <div>
-          <label htmlFor="password" className="block text-xs font-inter font-medium text-app-text-secondary mb-1.5">
+          <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-1.5">
             Password
           </label>
-          <div className="relative">
+          <div className="relative w-full">
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -109,55 +111,64 @@ export default function Auth() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-zinc-500 outline-none focus:border-[#D4AF37] transition-colors text-sm"
+              className={`${inputBase} pr-12`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white cursor-pointer z-10 transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {mode === 'login' && (
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-sm text-right w-full mt-1"
-              style={{ color: '#D4AF37' }}
-            >
-              Esqueceste a senha?
-            </button>
-          )}
         </div>
 
+        {/* Feedback message */}
         {message && (
           <p
-            className={`text-sm font-inter rounded-[var(--app-radius-sm)] px-3 py-2 ${
+            className={`text-sm rounded-lg px-3 py-2 border ${
               message.type === 'error'
-                ? 'text-app-error bg-app-error/10 border border-app-error/20'
-                : 'text-app-success bg-app-success/10 border border-app-success/20'
+                ? 'text-red-400 bg-red-500/10 border-red-500/20'
+                : 'text-green-400 bg-green-500/10 border-green-500/20'
             }`}
           >
             {message.text}
           </p>
         )}
 
+        {/* Submit */}
         <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full mt-2">
-          {mode === 'login' ? 'Entrar' : 'Criar conta'}
+          {mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA'}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm font-inter text-app-text-muted">
+      {/* Mode switch */}
+      <p className="mt-5 text-center text-sm text-zinc-500">
         {mode === 'login' ? 'Ainda não tens conta?' : 'Já tens conta?'}{' '}
         <button
-          onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(null); }}
-          className="text-app-accent hover:text-app-accent-hover font-medium transition-colors"
+          type="button"
+          onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(null); setShowPassword(false); }}
+          className="font-medium transition-colors hover:opacity-80"
+          style={{ color: '#D4AF37' }}
         >
-          {mode === 'login' ? 'Criar conta' : 'Entrar'}
+          {mode === 'login' ? 'Criar conta nova' : 'Já tenho conta — entrar'}
         </button>
       </p>
+
+      {/* Forgot password — login only */}
+      {mode === 'login' && (
+        <p className="mt-3 text-center">
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="text-sm transition-colors hover:opacity-80"
+            style={{ color: '#D4AF37' }}
+          >
+            Esqueceste a senha?
+          </button>
+        </p>
+      )}
     </AuthLayout>
   );
 }
