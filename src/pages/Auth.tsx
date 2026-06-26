@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { AuthLayout } from '@/components/layout/AuthLayout';
-import { Button } from '@/components/ui/Button';
 import { supabase, supabaseReady, supabaseNotReadyReason } from '@/lib/supabase';
 
 type Mode = 'login' | 'signup';
@@ -67,8 +66,6 @@ export default function Auth() {
     setMessage({ text: 'Email de redefinição enviado! Verifica a tua caixa de entrada.', type: 'success' });
   }
 
-  const inputBase = 'bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white w-full placeholder:text-zinc-500 outline-none focus:border-[#D4AF37] transition-colors text-sm';
-
   return (
     <AuthLayout
       title={mode === 'login' ? 'Entrar na conta' : 'Criar conta'}
@@ -92,7 +89,7 @@ export default function Auth() {
             placeholder="o.teu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={inputBase}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
           />
         </div>
 
@@ -111,13 +108,13 @@ export default function Auth() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`${inputBase} pr-12`}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:border-[#D4AF37] transition-colors text-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white cursor-pointer z-10 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white z-10 transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -126,21 +123,26 @@ export default function Auth() {
 
         {/* Feedback message */}
         {message && (
-          <p
-            className={`text-sm rounded-lg px-3 py-2 border ${
-              message.type === 'error'
-                ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                : 'text-green-400 bg-green-500/10 border-green-500/20'
-            }`}
-          >
+          <p className={`text-sm rounded-lg px-3 py-2 border ${
+            message.type === 'error'
+              ? 'text-red-400 bg-red-500/10 border-red-500/20'
+              : 'text-green-400 bg-green-500/10 border-green-500/20'
+          }`}>
             {message.text}
           </p>
         )}
 
         {/* Submit */}
-        <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full mt-2">
-          {mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA'}
-        </Button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-2 rounded-lg px-6 py-3 text-sm font-bold text-black transition-colors disabled:opacity-60"
+          style={{ background: loading ? '#a07d1a' : '#D4AF37' }}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = '#c9a227'; }}
+          onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = '#D4AF37'; }}
+        >
+          {loading ? 'A aguardar…' : mode === 'login' ? 'ENTRAR' : 'CRIAR CONTA'}
+        </button>
       </form>
 
       {/* Mode switch */}
@@ -149,7 +151,7 @@ export default function Auth() {
         <button
           type="button"
           onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setMessage(null); setShowPassword(false); }}
-          className="font-medium transition-colors hover:opacity-80"
+          className="font-medium hover:opacity-80 transition-opacity"
           style={{ color: '#D4AF37' }}
         >
           {mode === 'login' ? 'Criar conta nova' : 'Já tenho conta — entrar'}
@@ -162,7 +164,7 @@ export default function Auth() {
           <button
             type="button"
             onClick={handleForgotPassword}
-            className="text-sm transition-colors hover:opacity-80"
+            className="text-sm hover:opacity-80 transition-opacity"
             style={{ color: '#D4AF37' }}
           >
             Esqueceste a senha?

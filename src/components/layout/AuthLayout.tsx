@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import { BrandMark } from '@/components/ui/BrandMark';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -10,28 +10,25 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen bg-app-bg-primary flex flex-col items-center justify-center px-4">
-      {/* Glow */}
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4">
+      {/* Gold halo */}
       <div
         aria-hidden
-        className="pointer-events-none fixed top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full opacity-20 blur-[100px]"
-        style={{ background: 'radial-gradient(circle, var(--app-accent), transparent 70%)' }}
+        className="pointer-events-none fixed top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full opacity-20 blur-[100px]"
+        style={{ background: 'radial-gradient(circle, #D4AF37, transparent 70%)' }}
       />
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 mb-8 justify-center">
-          <div className="w-8 h-8 rounded-[var(--app-radius-sm)] bg-app-accent flex items-center justify-center">
-            <Zap size={16} className="text-white" />
-          </div>
-          <span className="font-grotesk font-bold text-app-text-primary text-base">ClipAnalisis</span>
+        <Link to="/" className="flex items-center justify-center mb-8">
+          <BrandMark size={36} withWordmark />
         </Link>
 
         {/* Card */}
-        <div className="bg-app-bg-card border border-app-border-subtle rounded-[var(--app-radius-xl)] p-8 shadow-[var(--app-shadow-card)]">
-          <h1 className="font-grotesk font-bold text-app-text-primary text-xl mb-1">{title}</h1>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+          <h1 className="font-bold text-white text-xl mb-1">{title}</h1>
           {subtitle && (
-            <p className="font-inter text-app-text-muted text-sm mb-6">{subtitle}</p>
+            <p className="text-zinc-400 text-sm mb-6">{subtitle}</p>
           )}
           {children}
         </div>
