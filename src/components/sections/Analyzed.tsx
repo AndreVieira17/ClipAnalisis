@@ -39,14 +39,20 @@ export function Analyzed() {
 
         <div className="mt-12 grid grid-cols-2 gap-8 border-y border-border py-8 sm:grid-cols-4">
           {STAT_VALUES.map((sv, i) => (
-            <Stat
+            <motion.div
               key={i}
-              value={sv.value}
-              prefix={sv.prefix}
-              suffix={sv.suffix}
-              decimals={sv.decimals}
-              label={t.analyzed.stats[i]?.label ?? ''}
-            />
+              whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              style={{ borderRadius: '8px' }}
+            >
+              <Stat
+                value={sv.value}
+                prefix={sv.prefix}
+                suffix={sv.suffix}
+                decimals={sv.decimals}
+                label={t.analyzed.stats[i]?.label ?? ''}
+              />
+            </motion.div>
           ))}
         </div>
 
@@ -56,12 +62,13 @@ export function Analyzed() {
           whileInView="show"
           viewport={{ once: true, margin: '-8%' }}
           className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          style={{ overflow: 'visible' }}
         >
           {t.analyzed.cards.map((a) => (
             <motion.div
               key={a.tag}
               variants={staggerChild}
-              whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
+              whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-6 transition-colors hover:border-gold/40">

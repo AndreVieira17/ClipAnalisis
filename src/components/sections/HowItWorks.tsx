@@ -34,12 +34,13 @@ export function HowItWorks() {
         whileInView="show"
         viewport={{ once: true, margin: '-10%' }}
         className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3"
+        style={{ overflow: 'visible' }}
       >
         {t.howItWorks.steps.map((s) => (
           <motion.div
             key={s.step}
             variants={staggerChild}
-            whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
+            whileHover={{ scale: 1.015, boxShadow: '0 0 20px rgba(212,175,55,0.15)' }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <PopCard className="h-full rounded-xzk border border-border bg-surface/60 p-7 transition-colors hover:border-gold/40">
