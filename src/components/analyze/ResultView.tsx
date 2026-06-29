@@ -311,6 +311,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export function ResultView({ result }: { result: AiResult }) {
   const hasNewStructure = Boolean(result.topicos && result.topicos.length >= 10);
 
+  // Debug: log potencial_viral so we can confirm it arrives from the API
+  console.log('[ResultView] potencial_viral:', result.potencial_viral ?? 'UNDEFINED — edge function not redeployed or old cached analysis');
+
   return (
     <div className="space-y-10">
 

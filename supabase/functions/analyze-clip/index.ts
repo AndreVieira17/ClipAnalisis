@@ -6,7 +6,7 @@
 //   elite   → unlimited + must have active subscription ≤ 30 days
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { buildPromptForPlan, SYSTEM_RUBRIC } from '../_shared/rubric.ts';
+import { buildPromptForPlan } from '../_shared/rubric.ts';
 import { analyzeVideo } from '../_shared/gemini.ts';
 import { extractJson, isUsable, normalize } from '../_shared/schema.ts';
 import { gateResult } from '../_shared/gating.ts';
@@ -164,7 +164,7 @@ Deno.serve(async (req) => {
       curatedAudios: matchTema(audios),
       curatedResources: matchTema(resources),
     };
-    const prompt = `${SYSTEM_RUBRIC}\n\n${buildPromptForPlan(plan, promptOpts)}`;
+    const prompt = buildPromptForPlan(plan, promptOpts);
 
     // ---- 9. Run Gemini (with retry on 503 / overload) ----------------------
     const isRetryable = (e: unknown): boolean => {
