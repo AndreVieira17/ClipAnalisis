@@ -4,6 +4,7 @@ import {
   type AiResult,
   type Topico,
   type Pilar,
+  type PotencialViral,
   PILAR_LABEL,
   PILAR_ORDER,
   PILAR_WEIGHTS,
@@ -197,6 +198,104 @@ function LinkChips({ title, items }: { title: string; items: { title: string; ur
   );
 }
 
+// ── Potencial Viral block ─────────────────────────────────────────────────────
+
+function PotencialViralBlock({ pv }: { pv: PotencialViral }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="rounded-xzk border p-5"
+      style={{ borderColor: 'rgba(212,175,55,0.35)', background: 'rgba(212,175,55,0.05)' }}
+    >
+      {/* header */}
+      <div className="flex items-center gap-2 mb-5">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M13 2L4.09 12.11a1 1 0 00.77 1.65H11l-1 8 8.92-10.11a1 1 0 00-.77-1.65H13l1-8z"
+            fill="#D4AF37" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span
+          className="uppercase text-gold"
+          style={{ ...F_HEADING_H2, fontSize: '0.75rem', letterSpacing: '0.18em' }}
+        >
+          Potencial do Clip
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Antes */}
+        <div
+          className="rounded-lg p-4"
+          style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <p
+            className="uppercase mb-3"
+            style={{ ...F_LABEL_SM, fontSize: '0.6rem', color: '#888', letterSpacing: '0.15em' }}
+          >
+            Clip atual
+          </p>
+          <p className="text-text/90 text-lg tabular-nums" style={{ ...F_SCORE_BIG, fontSize: '1.4rem' }}>
+            {pv.alcance_atual}
+          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <div className="h-1.5 flex-1 rounded-full overflow-hidden bg-white/5">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: 'rgba(212,175,55,0.5)' }}
+                initial={{ width: 0 }}
+                animate={{ width: `${pv.prob_atual}%` }}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
+              />
+            </div>
+            <span style={{ ...F_INTER_500, fontSize: '12px', color: '#888' }}>{pv.prob_atual}%</span>
+          </div>
+          <p style={{ ...F_INTER_500, fontSize: '11px', color: '#666', marginTop: '4px' }}>
+            probabilidade de atingir este range
+          </p>
+        </div>
+
+        {/* Depois */}
+        <div
+          className="rounded-lg p-4"
+          style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)' }}
+        >
+          <p
+            className="uppercase mb-3"
+            style={{ ...F_LABEL_SM, fontSize: '0.6rem', color: '#D4AF37CC', letterSpacing: '0.15em' }}
+          >
+            Após correcções
+          </p>
+          <p className="tabular-nums" style={{ ...F_SCORE_BIG, fontSize: '1.4rem', color: '#D4AF37' }}>
+            {pv.alcance_otimizado}
+          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <div className="h-1.5 flex-1 rounded-full overflow-hidden bg-white/5">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, #b8960c, #D4AF37)' }}
+                initial={{ width: 0 }}
+                animate={{ width: `${pv.prob_otimizado}%` }}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: 0.35 }}
+              />
+            </div>
+            <span style={{ ...F_INTER_500, fontSize: '12px', color: '#D4AF37BB' }}>{pv.prob_otimizado}%</span>
+          </div>
+          <p style={{ ...F_INTER_500, fontSize: '11px', color: '#D4AF3766', marginTop: '4px' }}>
+            probabilidade de atingir este range
+          </p>
+        </div>
+      </div>
+
+      {pv.resumo && (
+        <p className="mt-4 leading-relaxed text-muted/80" style={{ ...F_FEEDBACK, fontSize: '13px' }}>
+          {pv.resumo}
+        </p>
+      )}
+    </motion.div>
+  );
+}
+
 // ── Section heading helper ────────────────────────────────────────────────────
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -250,6 +349,11 @@ export function ResultView({ result }: { result: AiResult }) {
           {result.veredicto}
         </p>
       </div>
+
+      {/* ── Potencial viral ── */}
+      {result.potencial_viral && result.potencial_viral.alcance_atual && (
+        <PotencialViralBlock pv={result.potencial_viral} />
+      )}
 
       {/* ── 20 topic cards (new) ── */}
       {hasNewStructure && result.topicos && (

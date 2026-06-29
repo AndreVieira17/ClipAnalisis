@@ -67,6 +67,14 @@ export interface LinkItem { title: string; url: string; }
 export interface EditStep { ts_inicio: string; ts_fim: string; acao: string; detalhe: string; }
 export interface AcaoDia { dia: number; foco: string; tarefa: string; meta: string; }
 
+export interface PotencialViral {
+  alcance_atual: string;
+  prob_atual: number;
+  alcance_otimizado: string;
+  prob_otimizado: number;
+  resumo: string;
+}
+
 export interface AiResult {
   niche: string;
   has_metrics: boolean;
@@ -80,6 +88,7 @@ export interface AiResult {
   pilares?: Record<Pilar, PilarResult>;
   gargalo?: Pilar | string;
   // Common
+  potencial_viral?: PotencialViral;
   correcoes_prioritarias: Correcao[];
   estrategias_crescimento?: string[];
   audios_sugeridos: AudioSug[];

@@ -41,6 +41,19 @@ Analisas o vídeo FRAME A FRAME, segundo a segundo. O teu diagnóstico é cirúr
 • Clip profissional viral        → viral_readiness 78–90
 • Clips acima de 90 são extremamente raros — pensa bem antes de dar esse score
 
+━━━ POTENCIAL VIRAL — CALIBRAÇÃO OBRIGATÓRIA ━━━
+O campo "potencial_viral" indica o alcance realista ANTES e DEPOIS de aplicar todas as correcções.
+Usa o viral_readiness final como âncora — nunca infles os números:
+• viral_readiness < 40  → alcance_atual: "100–800 views",  alcance_otimizado: máx 8k views
+• viral_readiness 40–55 → alcance_atual: "500–3k views",   alcance_otimizado: máx 30k views
+• viral_readiness 55–65 → alcance_atual: "1k–8k views",    alcance_otimizado: máx 100k views
+• viral_readiness 65–75 → alcance_atual: "3k–20k views",   alcance_otimizado: máx 500k views
+• viral_readiness 75+   → alcance_atual: "10k–80k views",  alcance_otimizado: pode chegar a milhões, mas sê honesto
+Probabilidades: nunca acima de 75% mesmo no melhor cenário — há sempre incerteza de distribuição.
+A diferença ANTES/DEPOIS deve ser proporcional à gravidade dos problemas: se os problemas são pequenos, a melhoria é pequena.
+Usa sempre o formato "Xk–Yk views" ou "X–Y views" — nunca valores únicos, sempre um range.
+A plataforma (TikTok, Reels, Shorts) afecta a distribuição — Reels tende a ter alcance orgânico maior; Shorts tende a ser mais imprevisível.
+
 FORMATO DE SAÍDA: Responde APENAS com JSON válido. Sem markdown, sem texto fora do JSON. Português europeu.
 `.trim();
 
@@ -249,6 +262,13 @@ Responde SOMENTE com este JSON (sem texto fora do JSON):
   "confidence": "média",
   "veredicto": "2-3 frases directas: o ponto mais forte do clip, o maior problema, e o que mudar primeiro.",
   "topicos": ${buildTopicosList('short')},
+  "potencial_viral": {
+    "alcance_atual": "range realista em views para este clip tal como está agora",
+    "prob_atual": 0,
+    "alcance_otimizado": "range realista se fizer TODAS as correcções — não infles se o clip é fraco",
+    "prob_otimizado": 0,
+    "resumo": "1-2 frases honestas sobre o potencial real e o que mais limita o alcance."
+  },
   "correcoes_prioritarias": [
     { "titulo": "problema específico observado", "oquefazer": "passo exacto e accionável com exemplo", "porque": "impacto esperado em números/resultado" },
     { "titulo": "...", "oquefazer": "...", "porque": "..." },
@@ -293,6 +313,13 @@ Responde SOMENTE com este JSON:
   "confidence": "média",
   "veredicto": "3 frases: ponto forte principal, gargalo crítico que está a matar o alcance, e o próximo passo imediato.",
   "topicos": ${buildTopicosList('short')},
+  "potencial_viral": {
+    "alcance_atual": "range realista em views para este clip tal como está agora",
+    "prob_atual": 0,
+    "alcance_otimizado": "range realista se fizer TODAS as correcções — não infles se o clip é fraco",
+    "prob_otimizado": 0,
+    "resumo": "1-2 frases honestas sobre o potencial real e o que mais limita o alcance."
+  },
   "correcoes_prioritarias": [
     { "titulo": "problema específico", "oquefazer": "passo exacto com exemplo real", "porque": "impacto esperado" },
     { "titulo": "...", "oquefazer": "...", "porque": "..." },
@@ -346,6 +373,13 @@ Responde SOMENTE com este JSON:
   "confidence": "alta",
   "veredicto": "4-5 frases de diagnóstico preciso: o que está bem (com exemplo), o gargalo principal (com timestamp), o potencial real deste clip se corrigires os problemas, e o que fazer primeiro.",
   "topicos": ${buildTopicosList('deep')},
+  "potencial_viral": {
+    "alcance_atual": "range realista em views para este clip tal como está agora",
+    "prob_atual": 0,
+    "alcance_otimizado": "range realista se fizer TODAS as correcções — não infles se o clip é fraco",
+    "prob_otimizado": 0,
+    "resumo": "1-2 frases honestas sobre o potencial real e o que mais limita o alcance."
+  },
   "correcoes_prioritarias": [
     { "titulo": "problema específico com maior impacto", "oquefazer": "passo a passo exacto — não genérico", "porque": "impacto esperado em retençao/alcance/views" },
     { "titulo": "...", "oquefazer": "...", "porque": "..." },
@@ -414,6 +448,13 @@ Responde SOMENTE com este JSON:
   "confidence": "alta",
   "veredicto": "5-6 frases de coach: o que está bem (específico), o gargalo principal que está a matar o alcance (com timestamp), o potencial real deste clip se reeditar correctamente, uma comparação com o que viralizou no mesmo nicho, e o primeiro passo imediato.",
   "topicos": ${buildTopicosList('deep')},
+  "potencial_viral": {
+    "alcance_atual": "range realista em views para este clip tal como está agora",
+    "prob_atual": 0,
+    "alcance_otimizado": "range realista se fizer TODAS as correcções — não infles se o clip é fraco",
+    "prob_otimizado": 0,
+    "resumo": "1-2 frases honestas sobre o potencial real e o que mais limita o alcance."
+  },
   "correcoes_prioritarias": [
     { "titulo": "problema crítico #1 — o mais impactante", "oquefazer": "passo a passo exacto de implementação, não genérico", "porque": "impacto esperado com dados/estimativa realista" },
     { "titulo": "...", "oquefazer": "...", "porque": "..." },
