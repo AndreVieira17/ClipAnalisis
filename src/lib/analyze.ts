@@ -183,7 +183,7 @@ export async function getQuota(userId: string, plan: PlanTier): Promise<Quota> {
     };
   }
 
-  // Free: 1 per calendar day (resets at midnight UTC)
+  // Free: 1 analysis per email address — forever, never resets
   const { data: profile } = await supabase
     .from('profiles')
     .select('last_analysis_at')
@@ -191,18 +191,11 @@ export async function getQuota(userId: string, plan: PlanTier): Promise<Quota> {
     .single();
 
   const lastAt = profile?.last_analysis_at as string | null;
-  if (!lastAt) return { remaining: 1, limit: 1, nextResetAt: null };
-
-  const todayMidnightUTC = new Date();
-  todayMidnightUTC.setUTCHours(0, 0, 0, 0);
-  const usedToday = new Date(lastAt) >= todayMidnightUTC;
-
-  const tomorrow = new Date(todayMidnightUTC);
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const used = Boolean(lastAt);
 
   return {
-    remaining:   usedToday ? 0 : 1,
+    remaining:   used ? 0 : 1,
     limit:       1,
-    nextResetAt: usedToday ? tomorrow : null,
+    nextResetAt: null,
   };
 }

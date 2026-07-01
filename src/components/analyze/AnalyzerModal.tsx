@@ -187,8 +187,6 @@ export default function AnalyzerModal() {
       }
 
       if (err === 'limit_free' || err === 'limit_reached') {
-        const resetAt = outcome.next_reset_at ?? (outcome as { next_reset_at?: string }).next_reset_at;
-        if (resetAt) setNextResetAt(new Date(resetAt));
         setLimitPlan('free');
         setStep('limit');
         return;

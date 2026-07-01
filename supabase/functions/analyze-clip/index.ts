@@ -99,23 +99,11 @@ Deno.serve(async (req) => {
       // pro / elite: no daily limit
     }
 
-    // ---- 5. Free plan: 1 analysis per day (resets at midnight UTC) ---------
+    // ---- 5. Free plan: 1 analysis per email address — forever, never resets -
     if (plan === 'free') {
       const lastAt = profile?.last_analysis_at as string | null;
       if (lastAt) {
-        const lastDate = new Date(lastAt);
-        // Reset at UTC midnight
-        const todayMidnightUTC = new Date();
-        todayMidnightUTC.setUTCHours(0, 0, 0, 0);
-        if (lastDate >= todayMidnightUTC) {
-          const tomorrow = new Date(todayMidnightUTC);
-          tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-          return json({
-            ok: false,
-            error: 'limit_free',
-            next_reset_at: tomorrow.toISOString(),
-          }, 429);
-        }
+        return json({ ok: false, error: 'limit_free' }, 429);
       }
     }
 
