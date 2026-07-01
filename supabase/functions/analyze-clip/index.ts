@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ ok: false, error: 'method_not_allowed' }, 405);
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+  let uploadedVideoPath: string | undefined; // tracked for cleanup on any error path
 
   try {
     // ---- 1. Auth -----------------------------------------------------------
@@ -35,6 +36,7 @@ Deno.serve(async (req) => {
     // ---- 2. Input ----------------------------------------------------------
     const body = await req.json();
     const videoPath  = body.video_path  as string | undefined;
+    uploadedVideoPath = videoPath;
     const sourceUrl  = body.source_url  as string | undefined;
     const tema       = (body.tema       as string | undefined) ?? 'geral';
     const duracao    = (body.duracao    as number | undefined) ?? 0;
@@ -186,11 +188,15 @@ Deno.serve(async (req) => {
     }
 
     if (!raw) {
+      // Clean up the uploaded video regardless of error type
+      if (videoPath) {
+        admin.storage.from('clips').remove([videoPath]).catch(() => {});
+      }
       if (isRetryable(lastError)) {
         return json({
           ok: false,
           error: 'gemini_overloaded',
-          message: 'A IA está com muita procura agora. O teu clip foi guardado e a análise será feita automaticamente em breve.',
+          message: 'A IA está com muita procura agora. Tenta de novo em alguns minutos.',
         }, 503);
       }
       throw lastError ?? new Error('Gemini returned no response');
@@ -233,7 +239,14 @@ Deno.serve(async (req) => {
       return json({ ok: true, analysis_id: null, result: gated, warning: 'persist_failed' });
     }
 
-    // ---- 12. Update tracking counters --------------------------------------
+    // ---- 12. Delete video from storage immediately after analysis ----------
+    // Fire-and-forget — never block the response on cleanup
+    admin.storage.from('clips').remove([videoPath]).then(({ error: delErr }) => {
+      if (delErr) console.warn('storage cleanup failed (non-fatal):', delErr.message);
+      else console.log('storage cleaned:', videoPath);
+    });
+
+    // ---- 13. Update tracking counters --------------------------------------
     // Always update profiles.last_analysis_at
     await admin
       .from('profiles')
@@ -266,6 +279,7 @@ Deno.serve(async (req) => {
     return json({ ok: true, analysis_id: analysisId, result: gated });
   } catch (err) {
     console.error('analyze-clip error', err);
+    if (uploadedVideoPath) admin.storage.from('clips').remove([uploadedVideoPath]).catch(() => {});
     return json({ ok: false, error: 'analysis_failed', detail: String(err).slice(0, 500) }, 500);
   }
 });
