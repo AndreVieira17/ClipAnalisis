@@ -1,6 +1,6 @@
 // Edge Function: cleanup-clips
 // Deletes orphaned videos from the clips bucket.
-// Run manually or wire up a pg_cron / Supabase scheduled function to call this daily.
+// Run manually or via a scheduled trigger.
 //
 // Strategy:
 //  1. Delete ALL video paths recorded in the analyses table (should already be gone
@@ -8,14 +8,17 @@
 //  2. Scan the storage bucket recursively and delete any file older than 1 hour
 //     that wasn't caught by step 1 (e.g. the analysis crashed before the DB insert).
 //
-// Authorization: only accessible with the service-role key passed as Bearer token.
+// Authorization: optional CLEANUP_SECRET env var. If set, the caller must pass it
+// as ?secret=<value> or Authorization: Bearer <value>. If not set, the function
+// runs without auth (safe — it only cleans up storage files, never exposes data).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 
-const SUPABASE_URL  = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_ROLE  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ONE_HOUR_MS   = 60 * 60 * 1000;
+const SUPABASE_URL    = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_ROLE    = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const CLEANUP_SECRET  = Deno.env.get('CLEANUP_SECRET') ?? ''; // optional — leave empty to run without auth
+const ONE_HOUR_MS     = 60 * 60 * 1000;
 
 async function removeInBatches(
   admin: ReturnType<typeof createClient>,
@@ -38,10 +41,13 @@ async function removeInBatches(
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  // Require service-role bearer token so this endpoint isn't publicly triggerable
-  const auth = req.headers.get('Authorization') ?? '';
-  if (!auth.includes(SERVICE_ROLE)) {
-    return json({ ok: false, error: 'unauthorized' }, 401);
+  // If CLEANUP_SECRET is set, verify it — accept via Bearer header or ?secret= query param
+  if (CLEANUP_SECRET) {
+    const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+    const query  = new URL(req.url).searchParams.get('secret') ?? '';
+    if (bearer !== CLEANUP_SECRET && query !== CLEANUP_SECRET) {
+      return json({ ok: false, error: 'unauthorized' }, 401);
+    }
   }
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
